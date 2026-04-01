@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><title>Hồ sơ ứng tuyển</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f5f5; display: flex; }
+        .sidebar { width: 220px; min-height: 100vh; background: white; box-shadow: 2px 0 10px rgba(0,0,0,0.08); position: fixed; left: 0; top: 0; overflow-y: auto; }
+        .sidebar-logo { padding: 20px 15px; border-bottom: 1px solid #f0f0f0; text-align: center; }
+        .sidebar-logo .s-icon { font-size: 30px; } .sidebar-logo h2 { color: #5D4037; font-size: 16px; margin-top: 6px; } .sidebar-logo p { color: #aaa; font-size: 11px; }
+        .menu-label { padding: 8px 15px; font-size: 10px; color: #bbb; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+        .menu-item { display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: #555; text-decoration: none; font-size: 13px; border-left: 3px solid transparent; }
+        .menu-item:hover, .menu-item.active { background: #fbe9e7; color: #5D4037; border-left-color: #5D4037; font-weight: 600; }
+        .menu-item .mi { font-size: 16px; width: 20px; text-align: center; }
+        .main { margin-left: 220px; flex: 1; }
+        .topbar { background: white; padding: 12px 25px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .topbar h1 { font-size: 18px; color: #333; font-weight: 600; }
+        .btn-logout { padding: 7px 14px; background: #fbe9e7; color: #5D4037; border: none; border-radius: 8px; font-size: 12px; cursor: pointer; text-decoration: none; font-weight: 600; }
+        .content { padding: 25px; }
+        .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; border: none; }
+        .btn-secondary { background: #f5f5f5; color: #555; } .btn-sm { padding: 5px 10px; font-size: 12px; }
+        .job-info-bar { background: linear-gradient(135deg, #5D4037, #795548); color: white; padding: 18px 25px; border-radius: 12px; margin-bottom: 22px; }
+        .job-info-bar h2 { font-size: 18px; margin-bottom: 6px; }
+        .job-info-bar .meta { display: flex; gap: 16px; font-size: 13px; opacity: 0.85; }
+        .app-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+        .app-card { background: white; border-radius: 12px; padding: 18px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); border-left: 4px solid #e0e0e0; transition: box-shadow 0.2s; }
+        .app-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+        .app-card.status-pending { border-left-color: #ff9800; }
+        .app-card.status-reviewing { border-left-color: #2196F3; }
+        .app-card.status-accepted { border-left-color: #4CAF50; }
+        .app-card.status-rejected { border-left-color: #f44336; }
+        .app-name { font-size: 15px; font-weight: 700; color: #333; margin-bottom: 6px; }
+        .app-info { font-size: 12px; color: #888; margin-bottom: 4px; }
+        .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+        .badge-pending { background: #fff3e0; color: #e65100; }
+        .badge-reviewing { background: #e3f2fd; color: #1565c0; }
+        .badge-accepted { background: #e8f5e9; color: #2e7d32; }
+        .badge-rejected { background: #fdecea; color: #c62828; }
+        .status-form { margin-top: 14px; padding-top: 12px; border-top: 1px solid #f5f5f5; display: flex; gap: 8px; }
+        .status-form select { flex: 1; padding: 7px 10px; border: 1.5px solid #e0e0e0; border-radius: 8px; font-size: 12px; outline: none; }
+        .status-form select:focus { border-color: #5D4037; }
+        .status-form button { padding: 7px 14px; background: #5D4037; color: white; border: none; border-radius: 8px; font-size: 12px; cursor: pointer; font-weight: 600; }
+        .cv-link { display: inline-flex; align-items: center; gap: 4px; color: #1565c0; font-size: 12px; text-decoration: none; margin-top: 6px; }
+        .cv-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+<div class="sidebar">
+    <div class="sidebar-logo"><div class="s-icon">☕</div><h2>Coffee Shop</h2><p>Hệ thống quản lý</p></div>
+    <div>
+        <div class="menu-label">Tổng quan</div><a href="/dashboard" class="menu-item"><span class="mi">📊</span> Dashboard</a>
+        <div class="menu-label">Quản lý</div>
+        <a href="/admin/products" class="menu-item"><span class="mi">🛍️</span> Sản phẩm</a>
+        <a href="/admin/orders" class="menu-item"><span class="mi">📦</span> Đơn hàng</a>
+        <a href="/admin/customers" class="menu-item"><span class="mi">👥</span> Khách hàng</a>
+        <a href="/admin/vouchers" class="menu-item"><span class="mi">🎟️</span> Voucher</a>
+        <a href="/admin/branches" class="menu-item"><span class="mi">🏪</span> Chi nhánh</a>
+        <div class="menu-label">Nội dung</div>
+        <a href="/admin/blog" class="menu-item"><span class="mi">📝</span> Blog</a>
+        <a href="/admin/recruitment" class="menu-item active"><span class="mi">💼</span> Tuyển dụng</a>
+        <div class="menu-label">Hệ thống</div>
+        <a href="/admin/staff" class="menu-item"><span class="mi">👨‍💼</span> Nhân viên</a>
+    </div>
+</div>
+<div class="main">
+    <div class="topbar">
+        <h1>📄 Hồ sơ ứng tuyển</h1>
+        <div style="display:flex;gap:10px">
+            <a href="/admin/recruitment" class="btn btn-secondary">← Quay lại</a>
+            <a th:href="@{/auth/logout}" class="btn-logout">🚪 Đăng xuất</a>
+        </div>
+    </div>
+    <div class="content">
+        <div class="job-info-bar">
+            <h2>💼 <span th:text="${job.title}">Vị trí tuyển dụng</span></h2>
+            <div class="meta">
+                <span>🏪 <span th:text="${job.branch?.name ?: 'Tất cả chi nhánh'}"></span></span>
+                <span>📄 <strong th:text="${#lists.size(applications)}"></strong> hồ sơ</span>
+                <span>👥 Cần: <strong th:text="${job.slots}"></strong> người</span>
+            </div>
+        </div>
+
+        <div th:if="${#lists.isEmpty(applications)}" style="text-align:center;padding:60px;color:#bbb;background:white;border-radius:12px">
+            <div style="font-size:48px;margin-bottom:12px">📭</div>
+            <p>Chưa có hồ sơ nào ứng tuyển</p>
+        </div>
+
+        <div class="app-grid">
+            <div th:each="app : ${applications}"
+                 class="app-card"
+                 th:classappend="'status-' + ${app.status.name().toLowerCase()}">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+                    <div class="app-name" th:text="${app.applicantName}">Nguyễn Văn A</div>
+                    <span class="badge"
+                          th:classappend="'badge-' + ${app.status.name().toLowerCase()}"
+                          th:text="${app.status.name() == 'PENDING'} ? '🕐 Chờ' : (${app.status.name() == 'REVIEWING'} ? '🔍 Đang xem' : (${app.status.name() == 'ACCEPTED'} ? '✅ Nhận' : '❌ Từ chối'))">
+                    </span>
+                </div>
+                <div class="app-info">📧 <span th:text="${app.applicantEmail}"></span></div>
+                <div class="app-info">📞 <span th:text="${app.applicantPhone ?: '-'}"></span></div>
+                <div class="app-info">📅 Nộp: <span th:text="${app.createdAt != null ? #temporals.format(app.createdAt, 'dd/MM/yyyy HH:mm') : '-'}"></span></div>
+                <a th:if="${app.cvUrl != null}" th:href="${app.cvUrl}" target="_blank" class="cv-link">📎 Xem CV</a>
+                <div th:if="${app.coverLetter}" style="margin-top:8px;font-size:12px;color:#888;background:#fafafa;padding:8px;border-radius:6px"
+                     th:text="${#strings.abbreviate(app.coverLetter, 120)}"></div>
+
+                <form th:action="@{/admin/recruitment/applications/{id}/status(id=${app.id})}" method="post" class="status-form">
+                    <select name="status">
+                        <option th:each="s : ${statuses}" th:value="${s}" th:text="${s}" th:selected="${s == app.status}"></option>
+                    </select>
+                    <button type="submit">Cập nhật</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><title>Blog</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f5f5; display: flex; }
+        .sidebar { width: 220px; min-height: 100vh; background: white; box-shadow: 2px 0 10px rgba(0,0,0,0.08); position: fixed; left: 0; top: 0; overflow-y: auto; }
+        .sidebar-logo { padding: 20px 15px; border-bottom: 1px solid #f0f0f0; text-align: center; }
+        .sidebar-logo .s-icon { font-size: 30px; } .sidebar-logo h2 { color: #5D4037; font-size: 16px; margin-top: 6px; } .sidebar-logo p { color: #aaa; font-size: 11px; }
+        .menu-label { padding: 8px 15px; font-size: 10px; color: #bbb; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+        .menu-item { display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: #555; text-decoration: none; font-size: 13px; border-left: 3px solid transparent; }
+        .menu-item:hover, .menu-item.active { background: #fbe9e7; color: #5D4037; border-left-color: #5D4037; font-weight: 600; }
+        .menu-item .mi { font-size: 16px; width: 20px; text-align: center; }
+        .main { margin-left: 220px; flex: 1; }
+        .topbar { background: white; padding: 12px 25px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .topbar h1 { font-size: 18px; color: #333; font-weight: 600; }
+        .btn-logout { padding: 7px 14px; background: #fbe9e7; color: #5D4037; border: none; border-radius: 8px; font-size: 12px; cursor: pointer; text-decoration: none; font-weight: 600; }
+        .content { padding: 25px; }
+        .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; border: none; }
+        .btn-primary { background: #5D4037; color: white; } .btn-danger { background: #fdecea; color: #c62828; }
+        .btn-warning { background: #fff3e0; color: #e65100; } .btn-success { background: #e8f5e9; color: #2e7d32; }
+        .btn-sm { padding: 5px 10px; font-size: 12px; }
+        .card { background: white; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); overflow: hidden; }
+        .card-header { padding: 16px 22px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f0f0f0; }
+        .card-header h2 { font-size: 15px; color: #333; font-weight: 600; }
+        .blog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 18px; padding: 22px; }
+        .blog-card { border: 1px solid #f0f0f0; border-radius: 12px; overflow: hidden; transition: box-shadow 0.2s; }
+        .blog-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+        .blog-thumb { height: 160px; background: linear-gradient(135deg, #fbe9e7, #f5f0eb); display: flex; align-items: center; justify-content: center; font-size: 40px; overflow: hidden; position: relative; }
+        .blog-thumb img { width: 100%; height: 100%; object-fit: cover; }
+        .type-badge { position: absolute; top: 10px; left: 10px; padding: 3px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; }
+        .type-news { background: #e3f2fd; color: #1565c0; }
+        .type-promo { background: #fce4ec; color: #880e4f; }
+        .type-product { background: #e8f5e9; color: #2e7d32; }
+        .type-branch { background: #fff3e0; color: #e65100; }
+        .blog-body { padding: 14px; }
+        .blog-title { font-size: 14px; font-weight: 700; color: #333; margin-bottom: 6px; line-height: 1.4; }
+        .blog-meta { font-size: 11px; color: #bbb; display: flex; gap: 10px; margin-bottom: 10px; }
+        .blog-status { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+        .status-draft { background: #f5f5f5; color: #888; }
+        .status-published { background: #e8f5e9; color: #2e7d32; }
+        .status-archived { background: #fdecea; color: #c62828; }
+        .blog-actions { display: flex; gap: 6px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+<div class="sidebar">
+    <div class="sidebar-logo"><div class="s-icon">☕</div><h2>Coffee Shop</h2><p>Hệ thống quản lý</p></div>
+    <div>
+        <div class="menu-label">Tổng quan</div><a href="/dashboard" class="menu-item"><span class="mi">📊</span> Dashboard</a>
+        <div class="menu-label">Quản lý</div>
+        <a href="/admin/products" class="menu-item"><span class="mi">🛍️</span> Sản phẩm</a>
+        <a href="/admin/orders" class="menu-item"><span class="mi">📦</span> Đơn hàng</a>
+        <a href="/admin/customers" class="menu-item"><span class="mi">👥</span> Khách hàng</a>
+        <a href="/admin/vouchers" class="menu-item"><span class="mi">🎟️</span> Voucher</a>
+        <a href="/admin/branches" class="menu-item"><span class="mi">🏪</span> Chi nhánh</a>
+        <div class="menu-label">Nội dung</div>
+        <a href="/admin/blog" class="menu-item active"><span class="mi">📝</span> Blog</a>
+        <a href="/admin/recruitment" class="menu-item"><span class="mi">💼</span> Tuyển dụng</a>
+        <div class="menu-label">Hệ thống</div>
+        <a href="/admin/staff" class="menu-item"><span class="mi">👨‍💼</span> Nhân viên</a>
+    </div>
+</div>
+<div class="main">
+    <div class="topbar">
+        <h1>📝 Quản lý Blog</h1>
+        <a th:href="@{/auth/logout}" class="btn-logout">🚪 Đăng xuất</a>
+    </div>
+    <div class="content">
+        <div class="card">
+            <div class="card-header">
+                <h2>Danh sách bài viết (<span th:text="${#lists.size(posts)}">0</span>)</h2>
+                <a href="/admin/blog/new" class="btn btn-primary">✍️ Viết bài mới</a>
+            </div>
+
+            <div th:if="${#lists.isEmpty(posts)}" style="text-align:center;padding:60px;color:#bbb">
+                <div style="font-size:48px;margin-bottom:12px">📝</div>
+                <p>Chưa có bài viết nào</p>
+            </div>
+
+            <div class="blog-grid">
+                <div th:each="p : ${posts}" class="blog-card">
+                    <div class="blog-thumb">
+                        <img th:if="${p.thumbnailUrl != null}" th:src="${p.thumbnailUrl}" alt=""/>
+                        <span th:if="${p.thumbnailUrl == null}">📝</span>
+                        <span class="type-badge"
+                              th:classappend="${p.type.name() == 'NEWS'} ? 'type-news' : (${p.type.name() == 'PROMOTION'} ? 'type-promo' : (${p.type.name() == 'PRODUCT_BENEFIT'} ? 'type-product' : 'type-branch'))"
+                              th:text="${p.type}"></span>
+                    </div>
+                    <div class="blog-body">
+                        <div class="blog-title" th:text="${p.title}">Tiêu đề bài viết</div>
+                        <div class="blog-meta">
+                            <span>👤 <span th:text="${p.author?.name ?: 'Admin'}"></span></span>
+                            <span>📅 <span th:text="${p.createdAt != null ? #temporals.format(p.createdAt, 'dd/MM/yyyy') : '-'}"></span></span>
+                            <span>👁️ <span th:text="${p.viewCount}"></span></span>
+                        </div>
+                        <span class="blog-status"
+                              th:classappend="${p.status.name() == 'PUBLISHED'} ? 'status-published' : (${p.status.name() == 'DRAFT'} ? 'status-draft' : 'status-archived')"
+                              th:text="${p.status.name() == 'PUBLISHED'} ? '🟢 Đã đăng' : (${p.status.name() == 'DRAFT'} ? '📝 Bản nháp' : '📦 Lưu trữ')">
+                        </span>
+                        <div class="blog-actions">
+                            <a th:href="@{/admin/blog/edit/{id}(id=${p.id})}" class="btn btn-warning btn-sm" style="flex:1;justify-content:center">✏️ Sửa</a>
+                            <a th:if="${p.status.name() != 'PUBLISHED'}"
+                               th:href="@{/admin/blog/publish/{id}(id=${p.id})}"
+                               class="btn btn-success btn-sm">🚀 Đăng</a>
+                            <a th:href="@{/admin/blog/delete/{id}(id=${p.id})}"
+                               class="btn btn-danger btn-sm" onclick="return confirm('Xóa bài viết này?')">🗑️</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

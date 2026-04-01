@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><title>Voucher</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f5f5; display: flex; }
+        .sidebar { width: 220px; min-height: 100vh; background: white; box-shadow: 2px 0 10px rgba(0,0,0,0.08); position: fixed; left: 0; top: 0; overflow-y: auto; }
+        .sidebar-logo { padding: 20px 15px; border-bottom: 1px solid #f0f0f0; text-align: center; }
+        .sidebar-logo .s-icon { font-size: 30px; } .sidebar-logo h2 { color: #5D4037; font-size: 16px; margin-top: 6px; } .sidebar-logo p { color: #aaa; font-size: 11px; }
+        .menu-label { padding: 8px 15px; font-size: 10px; color: #bbb; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+        .menu-item { display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: #555; text-decoration: none; font-size: 13px; border-left: 3px solid transparent; }
+        .menu-item:hover, .menu-item.active { background: #fbe9e7; color: #5D4037; border-left-color: #5D4037; font-weight: 600; }
+        .menu-item .mi { font-size: 16px; width: 20px; text-align: center; }
+        .main { margin-left: 220px; flex: 1; }
+        .topbar { background: white; padding: 12px 25px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .topbar h1 { font-size: 18px; color: #333; font-weight: 600; }
+        .btn-logout { padding: 7px 14px; background: #fbe9e7; color: #5D4037; border: none; border-radius: 8px; font-size: 12px; cursor: pointer; text-decoration: none; font-weight: 600; }
+        .content { padding: 25px; }
+        .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; border: none; }
+        .btn-primary { background: #5D4037; color: white; } .btn-danger { background: #fdecea; color: #c62828; } .btn-warning { background: #fff3e0; color: #e65100; } .btn-sm { padding: 5px 10px; font-size: 12px; }
+        .card { background: white; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); overflow: hidden; }
+        .card-header { padding: 16px 22px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f0f0f0; }
+        .card-header h2 { font-size: 15px; color: #333; font-weight: 600; }
+        table { width: 100%; border-collapse: collapse; }
+        th { padding: 11px 15px; text-align: left; font-size: 11px; color: #888; font-weight: 600; text-transform: uppercase; background: #fafafa; border-bottom: 1px solid #f0f0f0; }
+        td { padding: 12px 15px; font-size: 13px; border-bottom: 1px solid #f5f5f5; vertical-align: middle; }
+        tr:last-child td { border-bottom: none; } tr:hover td { background: #fafafa; }
+        .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+        .badge-success { background: #e8f5e9; color: #2e7d32; } .badge-danger { background: #fdecea; color: #c62828; }
+        .badge-percent { background: #ede7f6; color: #4527a0; } .badge-fixed { background: #e3f2fd; color: #1565c0; }
+        .voucher-code { font-family: monospace; font-weight: 700; font-size: 14px; color: #5D4037; background: #fbe9e7; padding: 4px 10px; border-radius: 6px; }
+        .actions { display: flex; gap: 6px; }
+        .progress-bar { background: #f0f0f0; border-radius: 10px; height: 6px; min-width: 80px; }
+        .progress-fill { background: #5D4037; border-radius: 10px; height: 100%; }
+    </style>
+</head>
+<body>
+<div class="sidebar">
+    <div class="sidebar-logo"><div class="s-icon">☕</div><h2>Coffee Shop</h2><p>Hệ thống quản lý</p></div>
+    <div>
+        <div class="menu-label">Tổng quan</div><a href="/dashboard" class="menu-item"><span class="mi">📊</span> Dashboard</a>
+        <div class="menu-label">Quản lý</div>
+        <a href="/admin/products" class="menu-item"><span class="mi">🛍️</span> Sản phẩm</a>
+        <a href="/admin/orders" class="menu-item"><span class="mi">📦</span> Đơn hàng</a>
+        <a href="/admin/customers" class="menu-item"><span class="mi">👥</span> Khách hàng</a>
+        <a href="/admin/vouchers" class="menu-item active"><span class="mi">🎟️</span> Voucher</a>
+        <a href="/admin/branches" class="menu-item"><span class="mi">🏪</span> Chi nhánh</a>
+        <div class="menu-label">Nội dung</div>
+        <a href="/admin/blog" class="menu-item"><span class="mi">📝</span> Blog</a>
+        <a href="/admin/recruitment" class="menu-item"><span class="mi">💼</span> Tuyển dụng</a>
+        <div class="menu-label">Hệ thống</div>
+        <a href="/admin/staff" class="menu-item"><span class="mi">👨‍💼</span> Nhân viên</a>
+    </div>
+</div>
+<div class="main">
+    <div class="topbar">
+        <h1>🎟️ Quản lý Voucher</h1>
+        <a th:href="@{/auth/logout}" class="btn-logout">🚪 Đăng xuất</a>
+    </div>
+    <div class="content">
+        <div class="card">
+            <div class="card-header">
+                <h2>Danh sách voucher</h2>
+                <a href="/admin/vouchers/new" class="btn btn-primary">＋ Tạo voucher</a>
+            </div>
+            <table>
+                <thead>
+                <tr>
+                    <th>Mã voucher</th>
+                    <th>Mô tả</th>
+                    <th>Loại giảm</th>
+                    <th>Giá trị</th>
+                    <th>Đơn tối thiểu</th>
+                    <th>Đã dùng</th>
+                    <th>Hạn dùng</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${#lists.isEmpty(vouchers)}">
+                    <td colspan="9" style="text-align:center;padding:40px;color:#bbb">
+                        <div style="font-size:40px">🎟️</div><div>Chưa có voucher nào</div>
+                    </td>
+                </tr>
+                <tr th:each="v : ${vouchers}">
+                    <td><span class="voucher-code" th:text="${v.code}">CODE</span></td>
+                    <td th:text="${v.description ?: '-'}"></td>
+                    <td>
+                        <span class="badge" th:classappend="${v.discountType.name() == 'PERCENT'} ? 'badge-percent' : 'badge-fixed'"
+                              th:text="${v.discountType.name() == 'PERCENT'} ? '%' : 'Cố định'"></span>
+                    </td>
+                    <td style="font-weight:600;color:#5D4037"
+                        th:text="${v.discountType.name() == 'PERCENT'} ? ${v.discountValue + '%'} : ${#numbers.formatInteger(v.discountValue, 1, 'COMMA') + 'đ'}">
+                    </td>
+                    <td th:text="${#numbers.formatInteger(v.minOrderValue, 1, 'COMMA') + 'đ'}"></td>
+                    <td>
+                        <div style="font-size:12px;margin-bottom:4px" th:text="${v.usedCount + '/' + v.maxUses}"></div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" th:style="'width:' + ${v.maxUses > 0 ? (v.usedCount * 100 / v.maxUses) : 0} + '%'"></div>
+                        </div>
+                    </td>
+                    <td style="font-size:12px" th:text="${v.expiresAt != null ? #temporals.format(v.expiresAt, 'dd/MM/yyyy') : 'Không giới hạn'}"></td>
+                    <td>
+                        <span class="badge" th:classappend="${v.isActive} ? 'badge-success' : 'badge-danger'"
+                              th:text="${v.isActive} ? '✅ Đang dùng' : '⏸ Tạm dừng'"></span>
+                    </td>
+                    <td>
+                        <div class="actions">
+                            <a th:href="@{/admin/vouchers/edit/{id}(id=${v.id})}" class="btn btn-warning btn-sm">✏️</a>
+                            <a th:href="@{/admin/vouchers/delete/{id}(id=${v.id})}" class="btn btn-danger btn-sm" onclick="return confirm('Xóa voucher này?')">🗑️</a>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>
