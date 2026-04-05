@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><title>Nhân viên</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f5f5; display: flex; }
+        .sidebar { width: 220px; min-height: 100vh; background: white; box-shadow: 2px 0 10px rgba(0,0,0,0.08); position: fixed; left: 0; top: 0; overflow-y: auto; }
+        .sidebar-logo { padding: 20px 15px; border-bottom: 1px solid #f0f0f0; text-align: center; }
+        .sidebar-logo .s-icon { font-size: 30px; } .sidebar-logo h2 { color: #5D4037; font-size: 16px; margin-top: 6px; } .sidebar-logo p { color: #aaa; font-size: 11px; }
+        .menu-label { padding: 8px 15px; font-size: 10px; color: #bbb; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+        .menu-item { display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: #555; text-decoration: none; font-size: 13px; border-left: 3px solid transparent; }
+        .menu-item:hover, .menu-item.active { background: #fbe9e7; color: #5D4037; border-left-color: #5D4037; font-weight: 600; }
+        .menu-item .mi { font-size: 16px; width: 20px; text-align: center; }
+        .main { margin-left: 220px; flex: 1; }
+        .topbar { background: white; padding: 12px 25px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .topbar h1 { font-size: 18px; color: #333; font-weight: 600; }
+        .btn-logout { padding: 7px 14px; background: #fbe9e7; color: #5D4037; border: none; border-radius: 8px; font-size: 12px; cursor: pointer; text-decoration: none; font-weight: 600; }
+        .content { padding: 25px; }
+        .staff-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+        .staff-card { background: white; border-radius: 14px; padding: 22px 18px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); text-align: center; transition: transform 0.2s, box-shadow 0.2s; }
+        .staff-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
+        .staff-avatar { width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(135deg, #5D4037, #795548); display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; font-weight: 700; margin: 0 auto 12px; }
+        .staff-name { font-size: 15px; font-weight: 700; color: #333; margin-bottom: 4px; }
+        .staff-email { font-size: 12px; color: #bbb; margin-bottom: 4px; }
+        .staff-phone { font-size: 12px; color: #888; }
+        .staff-badge { display: inline-block; padding: 3px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; margin-top: 10px; }
+        .badge-active { background: #e8f5e9; color: #2e7d32; }
+        .badge-inactive { background: #fdecea; color: #c62828; }
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; }
+        .page-header h2 { font-size: 16px; color: #555; }
+    </style>
+</head>
+<body>
+<div class="sidebar">
+    <div class="sidebar-logo"><div class="s-icon">☕</div><h2>Coffee Shop</h2><p>Hệ thống quản lý</p></div>
+    <div>
+        <div class="menu-label">Tổng quan</div><a href="/dashboard" class="menu-item"><span class="mi">📊</span> Dashboard</a>
+        <div class="menu-label">Quản lý</div>
+        <a href="/admin/products" class="menu-item"><span class="mi">🛍️</span> Sản phẩm</a>
+        <a href="/admin/orders" class="menu-item"><span class="mi">📦</span> Đơn hàng</a>
+        <a href="/admin/customers" class="menu-item"><span class="mi">👥</span> Khách hàng</a>
+        <a href="/admin/vouchers" class="menu-item"><span class="mi">🎟️</span> Voucher</a>
+        <a href="/admin/branches" class="menu-item"><span class="mi">🏪</span> Chi nhánh</a>
+        <div class="menu-label">Nội dung</div>
+        <a href="/admin/blog" class="menu-item"><span class="mi">📝</span> Blog</a>
+        <a href="/admin/recruitment" class="menu-item"><span class="mi">💼</span> Tuyển dụng</a>
+        <div class="menu-label">Hệ thống</div>
+        <a href="/admin/staff" class="menu-item active"><span class="mi">👨‍💼</span> Nhân viên</a>
+    </div>
+</div>
+<div class="main">
+    <div class="topbar">
+        <h1>👨‍💼 Danh sách nhân viên</h1>
+        <a th:href="@{/auth/logout}" class="btn-logout">🚪 Đăng xuất</a>
+    </div>
+    <div class="content">
+        <div class="page-header">
+            <h2 th:text="${#lists.size(staff)} + ' nhân viên'">0 nhân viên</h2>
+        </div>
+
+        <div th:if="${#lists.isEmpty(staff)}" style="text-align:center;padding:60px;color:#bbb;background:white;border-radius:12px">
+            <div style="font-size:52px;margin-bottom:14px">👨‍💼</div>
+            <p>Chưa có nhân viên nào</p>
+            <p style="font-size:12px;margin-top:8px">Nhân viên sẽ được thêm thông qua ứng dụng mobile</p>
+        </div>
+
+        <div class="staff-grid">
+            <div th:each="s : ${staff}" class="staff-card">
+                <div class="staff-avatar" th:text="${#strings.substring(s.name, 0, 1).toUpperCase()}">A</div>
+                <div class="staff-name" th:text="${s.name}">Tên nhân viên</div>
+                <div class="staff-email" th:text="${s.email}">email@example.com</div>
+                <div class="staff-phone" th:text="${s.phone ?: '---'}">SĐT</div>
+                <span class="staff-badge"
+                      th:classappend="${s.isActive} ? 'badge-active' : 'badge-inactive'"
+                      th:text="${s.isActive} ? '✅ Đang làm việc' : '⏸ Nghỉ'">
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

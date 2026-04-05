@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><title>Chi tiết đơn hàng</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f5f5; display: flex; }
+        .sidebar { width: 220px; min-height: 100vh; background: white; box-shadow: 2px 0 10px rgba(0,0,0,0.08); position: fixed; left: 0; top: 0; overflow-y: auto; }
+        .sidebar-logo { padding: 20px 15px; border-bottom: 1px solid #f0f0f0; text-align: center; }
+        .sidebar-logo .s-icon { font-size: 30px; } .sidebar-logo h2 { color: #5D4037; font-size: 16px; margin-top: 6px; } .sidebar-logo p { color: #aaa; font-size: 11px; }
+        .menu-label { padding: 8px 15px; font-size: 10px; color: #bbb; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+        .menu-item { display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: #555; text-decoration: none; font-size: 13px; border-left: 3px solid transparent; }
+        .menu-item:hover, .menu-item.active { background: #fbe9e7; color: #5D4037; border-left-color: #5D4037; font-weight: 600; }
+        .menu-item .mi { font-size: 16px; width: 20px; text-align: center; }
+        .main { margin-left: 220px; flex: 1; }
+        .topbar { background: white; padding: 12px 25px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .topbar h1 { font-size: 18px; color: #333; font-weight: 600; }
+        .btn-logout { padding: 7px 14px; background: #fbe9e7; color: #5D4037; border: none; border-radius: 8px; font-size: 12px; cursor: pointer; text-decoration: none; font-weight: 600; }
+        .content { padding: 25px; }
+        .btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; border: none; }
+        .btn-primary { background: #5D4037; color: white; } .btn-secondary { background: #f5f5f5; color: #555; }
+        .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .card { background: white; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); overflow: hidden; margin-bottom: 20px; }
+        .card-header { padding: 16px 22px; border-bottom: 1px solid #f0f0f0; font-size: 15px; font-weight: 600; color: #333; }
+        .card-body { padding: 20px 22px; }
+        .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f5f5f5; font-size: 13px; }
+        .info-row:last-child { border-bottom: none; }
+        .info-row .label { color: #888; }
+        .info-row .value { font-weight: 500; color: #333; }
+        table { width: 100%; border-collapse: collapse; }
+        th { padding: 10px 15px; text-align: left; font-size: 11px; color: #888; font-weight: 600; text-transform: uppercase; background: #fafafa; }
+        td { padding: 12px 15px; font-size: 13px; border-bottom: 1px solid #f5f5f5; }
+        .status-form { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+        .status-form select { padding: 10px 14px; border: 1.5px solid #e0e0e0; border-radius: 8px; font-size: 13px; outline: none; }
+        .status-form select:focus { border-color: #5D4037; }
+        .order-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+        .order-code { font-size: 20px; font-weight: 700; color: #5D4037; }
+        .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+        .badge-pending { background: #fff3e0; color: #e65100; }
+        .badge-confirmed { background: #e3f2fd; color: #1565c0; }
+        .badge-preparing { background: #ede7f6; color: #4527a0; }
+        .badge-delivering { background: #e1f5fe; color: #0277bd; }
+        .badge-done { background: #e8f5e9; color: #2e7d32; }
+        .badge-cancelled { background: #fdecea; color: #c62828; }
+        .total-row { background: #fbe9e7; font-weight: 700; font-size: 15px; }
+        .total-row td { color: #5D4037; }
+    </style>
+</head>
+<body>
+<div class="sidebar">
+    <div class="sidebar-logo"><div class="s-icon">☕</div><h2>Coffee Shop</h2><p>Hệ thống quản lý</p></div>
+    <div>
+        <div class="menu-label">Tổng quan</div><a href="/dashboard" class="menu-item"><span class="mi">📊</span> Dashboard</a>
+        <div class="menu-label">Quản lý</div>
+        <a href="/admin/products" class="menu-item"><span class="mi">🛍️</span> Sản phẩm</a>
+        <a href="/admin/orders" class="menu-item active"><span class="mi">📦</span> Đơn hàng</a>
+        <a href="/admin/customers" class="menu-item"><span class="mi">👥</span> Khách hàng</a>
+        <a href="/admin/vouchers" class="menu-item"><span class="mi">🎟️</span> Voucher</a>
+        <a href="/admin/branches" class="menu-item"><span class="mi">🏪</span> Chi nhánh</a>
+        <div class="menu-label">Nội dung</div>
+        <a href="/admin/blog" class="menu-item"><span class="mi">📝</span> Blog</a>
+        <a href="/admin/recruitment" class="menu-item"><span class="mi">💼</span> Tuyển dụng</a>
+        <div class="menu-label">Hệ thống</div>
+        <a href="/admin/staff" class="menu-item"><span class="mi">👨‍💼</span> Nhân viên</a>
+    </div>
+</div>
+<div class="main">
+    <div class="topbar">
+        <h1>📦 Chi tiết đơn hàng</h1>
+        <a th:href="@{/auth/logout}" class="btn-logout">🚪 Đăng xuất</a>
+    </div>
+    <div class="content">
+        <div class="order-header">
+            <div>
+                <div class="order-code" th:text="${order.orderCode}">CS-001</div>
+                <div style="font-size:13px;color:#bbb;margin-top:4px" th:text="${#temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm')}"></div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center">
+                <span class="badge"
+                      th:text="${order.status}"
+                      th:classappend="${order.status.name() == 'PENDING'} ? 'badge-pending' :
+                                      (${order.status.name() == 'CONFIRMED'} ? 'badge-confirmed' :
+                                      (${order.status.name() == 'PREPARING'} ? 'badge-preparing' :
+                                      (${order.status.name() == 'DELIVERING'} ? 'badge-delivering' :
+                                      (${order.status.name() == 'DONE'} ? 'badge-done' : 'badge-cancelled'))))">
+                </span>
+                <a href="/admin/orders" class="btn btn-secondary">← Quay lại</a>
+            </div>
+        </div>
+
+        <!-- CẬP NHẬT TRẠNG THÁI -->
+        <div class="card" style="margin-bottom:20px">
+            <div class="card-header">🔄 Cập nhật trạng thái đơn hàng</div>
+            <div class="card-body">
+                <form th:action="@{/admin/orders/{id}/status(id=${order.id})}" method="post">
+                    <div class="status-form">
+                        <select name="status">
+                            <option th:each="s : ${statuses}" th:value="${s}" th:text="${s}" th:selected="${s == order.status}"></option>
+                        </select>
+                        <button type="submit" class="btn btn-primary">💾 Cập nhật</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="grid2">
+            <!-- THÔNG TIN KHÁCH -->
+            <div class="card">
+                <div class="card-header">👤 Thông tin khách hàng</div>
+                <div class="card-body">
+                    <div class="info-row"><span class="label">Tên</span><span class="value" th:text="${order.user?.name ?: 'Khách'}"></span></div>
+                    <div class="info-row"><span class="label">Email</span><span class="value" th:text="${order.user?.email ?: '-'}"></span></div>
+                    <div class="info-row"><span class="label">SĐT</span><span class="value" th:text="${order.user?.phone ?: '-'}"></span></div>
+                    <div class="info-row"><span class="label">Chi nhánh</span><span class="value" th:text="${order.branch?.name ?: '-'}"></span></div>
+                </div>
+            </div>
+
+            <!-- THÔNG TIN THANH TOÁN -->
+            <div class="card">
+                <div class="card-header">💳 Thông tin thanh toán</div>
+                <div class="card-body">
+                    <div class="info-row"><span class="label">Phương thức</span><span class="value" th:text="${order.paymentMethod}"></span></div>
+                    <div class="info-row"><span class="label">Trạng thái TT</span><span class="value" th:text="${order.paymentStatus}"></span></div>
+                    <div class="info-row"><span class="label">Voucher</span><span class="value" th:text="${order.voucher?.code ?: 'Không có'}"></span></div>
+                    <div class="info-row"><span class="label">Giảm giá</span><span class="value" th:text="${#numbers.formatInteger(order.discountAmount, 1, 'COMMA') + 'đ'}"></span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SẢN PHẨM -->
+        <div class="card">
+            <div class="card-header">🛍️ Sản phẩm đã đặt</div>
+            <table>
+                <thead>
+                <tr>
+                    <th>Sản phẩm</th>
+                    <th>Size</th>
+                    <th>Đơn giá</th>
+                    <th>Số lượng</th>
+                    <th>Thành tiền</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="item : ${order.items}">
+                    <td th:text="${item.productName}"></td>
+                    <td><span style="background:#fbe9e7;color:#5D4037;padding:2px 10px;border-radius:12px;font-size:12px;font-weight:600" th:text="${item.size}"></span></td>
+                    <td th:text="${#numbers.formatInteger(item.price, 1, 'COMMA') + 'đ'}"></td>
+                    <td th:text="'x' + ${item.quantity}"></td>
+                    <td style="font-weight:600" th:text="${#numbers.formatInteger(item.subtotal, 1, 'COMMA') + 'đ'}"></td>
+                </tr>
+                <tr class="total-row">
+                    <td colspan="4" style="text-align:right">TỔNG THANH TOÁN:</td>
+                    <td th:text="${#numbers.formatInteger(order.total, 1, 'COMMA') + 'đ'}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div th:if="${order.note}" class="card">
+            <div class="card-header">📝 Ghi chú</div>
+            <div class="card-body" th:text="${order.note}"></div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

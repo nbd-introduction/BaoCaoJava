@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Sản phẩm - Coffee Shop Admin</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f5f5; display: flex; }
+        .sidebar { width: 220px; min-height: 100vh; background: white; box-shadow: 2px 0 10px rgba(0,0,0,0.08); position: fixed; left: 0; top: 0; overflow-y: auto; }
+        .sidebar-logo { padding: 20px 15px; border-bottom: 1px solid #f0f0f0; text-align: center; }
+        .sidebar-logo .s-icon { font-size: 30px; }
+        .sidebar-logo h2 { color: #5D4037; font-size: 16px; margin-top: 6px; }
+        .sidebar-logo p { color: #aaa; font-size: 11px; }
+        .menu-label { padding: 8px 15px; font-size: 10px; color: #bbb; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+        .menu-item { display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: #555; text-decoration: none; font-size: 13px; border-left: 3px solid transparent; }
+        .menu-item:hover, .menu-item.active { background: #fbe9e7; color: #5D4037; border-left-color: #5D4037; font-weight: 600; }
+        .menu-item .mi { font-size: 16px; width: 20px; text-align: center; }
+        .main { margin-left: 220px; flex: 1; }
+        .topbar { background: white; padding: 12px 25px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .topbar h1 { font-size: 18px; color: #333; font-weight: 600; }
+        .btn-logout { padding: 7px 14px; background: #fbe9e7; color: #5D4037; border: none; border-radius: 8px; font-size: 12px; cursor: pointer; text-decoration: none; font-weight: 600; }
+        .content { padding: 25px; }
+        .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; border: none; }
+        .btn-primary { background: #5D4037; color: white; }
+        .btn-danger { background: #fdecea; color: #c62828; }
+        .btn-warning { background: #fff3e0; color: #e65100; }
+        .btn-success { background: #e8f5e9; color: #2e7d32; }
+        .btn-sm { padding: 5px 10px; font-size: 12px; }
+        .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 22px; }
+        .stat-card { background: white; padding: 16px 18px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); display: flex; align-items: center; gap: 12px; }
+        .stat-icon { width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        .si-brown { background: #fbe9e7; } .si-green { background: #e8f5e9; } .si-blue { background: #e3f2fd; }
+        .stat-info .num { font-size: 22px; font-weight: 700; color: #333; }
+        .stat-info .lbl { font-size: 12px; color: #999; }
+        .card { background: white; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); overflow: hidden; }
+        .card-header { padding: 16px 22px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f0f0f0; }
+        .card-header h2 { font-size: 15px; color: #333; font-weight: 600; }
+        table { width: 100%; border-collapse: collapse; }
+        th { padding: 11px 15px; text-align: left; font-size: 11px; color: #888; font-weight: 600; text-transform: uppercase; background: #fafafa; border-bottom: 1px solid #f0f0f0; }
+        td { padding: 12px 15px; font-size: 13px; color: #333; border-bottom: 1px solid #f5f5f5; vertical-align: middle; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: #fafafa; }
+        .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+        .badge-success { background: #e8f5e9; color: #2e7d32; }
+        .badge-danger { background: #fdecea; color: #c62828; }
+        .badge-info { background: #e3f2fd; color: #1565c0; }
+        .actions { display: flex; gap: 6px; }
+        .prod-thumb { width: 44px; height: 44px; border-radius: 8px; background: #f5f0eb; display: flex; align-items: center; justify-content: center; font-size: 22px; overflow: hidden; }
+        .prod-thumb img { width: 100%; height: 100%; object-fit: cover; }
+        .price-list { display: flex; gap: 6px; flex-wrap: wrap; }
+        .price-tag { background: #fbe9e7; color: #5D4037; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+        .filter-bar { display: flex; gap: 10px; padding: 14px 22px; border-bottom: 1px solid #f5f5f5; }
+        .filter-bar select, .filter-bar input { padding: 8px 12px; border: 1.5px solid #e0e0e0; border-radius: 8px; font-size: 13px; outline: none; }
+        .filter-bar input:focus, .filter-bar select:focus { border-color: #5D4037; }
+    </style>
+</head>
+<body>
+<div class="sidebar">
+    <div class="sidebar-logo"><div class="s-icon">☕</div><h2>Coffee Shop</h2><p>Hệ thống quản lý</p></div>
+    <div>
+        <div class="menu-label">Tổng quan</div>
+        <a href="/dashboard" class="menu-item"><span class="mi">📊</span> Dashboard</a>
+        <div class="menu-label">Quản lý</div>
+        <a href="/admin/products" class="menu-item active"><span class="mi">🛍️</span> Sản phẩm</a>
+        <a href="/admin/orders" class="menu-item"><span class="mi">📦</span> Đơn hàng</a>
+        <a href="/admin/customers" class="menu-item"><span class="mi">👥</span> Khách hàng</a>
+        <a href="/admin/vouchers" class="menu-item"><span class="mi">🎟️</span> Voucher</a>
+        <a href="/admin/branches" class="menu-item"><span class="mi">🏪</span> Chi nhánh</a>
+        <div class="menu-label">Nội dung</div>
+        <a href="/admin/blog" class="menu-item"><span class="mi">📝</span> Blog</a>
+        <a href="/admin/recruitment" class="menu-item"><span class="mi">💼</span> Tuyển dụng</a>
+        <div class="menu-label">Hệ thống</div>
+        <a href="/admin/staff" class="menu-item"><span class="mi">👨‍💼</span> Nhân viên</a>
+        <a href="/admin/categories" class="menu-item"><span class="mi">📂</span> Danh mục</a>
+        <a href="/admin/banners" class="menu-item"><span class="mi">🖼️</span> Banner</a>
+    </div>
+</div>
+
+<div class="main">
+    <div class="topbar">
+        <h1>🛍️ Quản lý sản phẩm</h1>
+        <a th:href="@{/auth/logout}" class="btn-logout">🚪 Đăng xuất</a>
+    </div>
+    <div class="content">
+
+        <!-- STATS -->
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-icon si-brown">🛍️</div>
+                <div class="stat-info">
+                    <div class="num" th:text="${#lists.size(products)}">0</div>
+                    <div class="lbl">Tổng sản phẩm</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon si-green">✅</div>
+                <div class="stat-info">
+                    <div class="num" th:text="${availableCount}">0</div>
+                    <div class="lbl">Đang bán</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon si-blue">📂</div>
+                <div class="stat-info">
+                    <div class="num" th:text="${#lists.size(categories)}">0</div>
+                    <div class="lbl">Danh mục</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TABLE -->
+        <div class="card">
+            <div class="card-header">
+                <h2>Danh sách sản phẩm</h2>
+                <a href="/admin/products/new" class="btn btn-primary">＋ Thêm sản phẩm</a>
+            </div>
+            <div class="filter-bar">
+                <input type="text" placeholder="🔍 Tìm tên sản phẩm..." oninput="filterByName(this.value)" style="width:280px"/>
+                <select onchange="filterByStatus(this.value)">
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="active">✅ Đang bán</option>
+                    <option value="hidden">⏸ Đã ẩn</option>
+                </select>
+            </div>
+            <div style="overflow-x:auto">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Sản phẩm</th>
+                        <th>Danh mục</th>
+                        <th>Giá (S/M/L)</th>
+                        <th>Rating</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                    </thead>
+                    <tbody id="productTable">
+                    <tr th:if="${#lists.isEmpty(products)}">
+                        <td colspan="7" style="text-align:center;padding:40px;color:#bbb">
+                            <div style="font-size:40px;margin-bottom:10px">🛍️</div>
+                            Chưa có sản phẩm nào
+                        </td>
+                    </tr>
+                    <tr th:each="p, stat : ${products}">
+                        <td style="color:#bbb;font-size:12px" th:text="${stat.count}">1</td>
+                        <td>
+                            <div style="display:flex;align-items:center;gap:10px">
+                                <div class="prod-thumb">
+                                    <img th:if="${p.imageUrl != null}" th:src="${p.imageUrl}" alt=""/>
+                                    <span th:if="${p.imageUrl == null}">☕</span>
+                                </div>
+                                <div>
+                                    <div style="font-weight:600" th:text="${p.name}">Tên sản phẩm</div>
+                                    <div style="font-size:11px;color:#bbb"
+                                         th:text="${p.description != null ? #strings.abbreviate(p.description, 40) : ''}"></div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge badge-info" th:text="${p.category != null ? p.category.name : 'Chưa phân loại'}"></span>
+                        </td>
+                        <td>
+                            <div class="price-list">
+                                <th:block th:if="${p.sizes != null and !#lists.isEmpty(p.sizes)}">
+                                    <span th:each="sz : ${p.sizes}" class="price-tag"
+                                          th:text="${sz.size + ': ' + #numbers.formatInteger(sz.price, 1, 'COMMA') + 'đ'}"></span>
+                                </th:block>
+                                <span th:if="${p.sizes == null or #lists.isEmpty(p.sizes)}"
+                                      style="color:#bbb;font-size:12px">Chưa có giá</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span th:if="${p.reviewCount != null and p.reviewCount > 0}">
+                                ⭐ <span th:text="${#numbers.formatDecimal(p.avgRating, 1, 1)}">0</span>
+                                <span style="color:#bbb;font-size:11px">(<span th:text="${p.reviewCount}"></span>)</span>
+                            </span>
+                            <span th:if="${p.reviewCount == null or p.reviewCount == 0}"
+                                  style="color:#bbb;font-size:12px">Chưa có</span>
+                        </td>
+                        <td>
+                            <span th:if="${p.isAvailable}" class="badge badge-success">✅ Đang bán</span>
+                            <span th:if="${!p.isAvailable}" class="badge badge-danger">⏸ Ẩn</span>
+                        </td>
+                        <td>
+                            <div class="actions">
+                                <a th:href="@{/admin/products/edit/{id}(id=${p.id})}" class="btn btn-warning btn-sm">✏️ Sửa</a>
+                                <form th:action="@{/admin/products/{id}/toggle(id=${p.id})}" method="post" style="display:inline">
+                                    <button type="submit" class="btn btn-sm"
+                                            th:classappend="${p.isAvailable} ? 'btn-danger' : 'btn-success'"
+                                            th:text="${p.isAvailable} ? '⏸ Ẩn' : '✅ Hiện'"></button>
+                                </form>
+                                <a th:href="@{/admin/products/delete/{id}(id=${p.id})}"
+                                   class="btn btn-danger btn-sm"
+                                   onclick="return confirm('Xóa sản phẩm này?')">🗑️</a>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function filterByName(val) {
+        document.querySelectorAll('#productTable tr[th\\:each], #productTable tr:not([style])').forEach(row => {
+            if (row.cells && row.cells.length > 1) {
+                const name = row.cells[1]?.textContent?.toLowerCase() || '';
+                row.style.display = name.includes(val.toLowerCase()) ? '' : 'none';
+            }
+        });
+        // Simpler approach
+        const rows = document.querySelectorAll('#productTable tr');
+        rows.forEach(row => {
+            if (row.cells && row.cells.length > 2) {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(val.toLowerCase()) ? '' : 'none';
+            }
+        });
+    }
+    function filterByStatus(val) {
+        const rows = document.querySelectorAll('#productTable tr');
+        rows.forEach(row => {
+            if (row.cells && row.cells.length > 2) {
+                const statusCell = row.cells[5]?.textContent || '';
+                if (!val) { row.style.display = ''; return; }
+                if (val === 'active') row.style.display = statusCell.includes('Đang bán') ? '' : 'none';
+                if (val === 'hidden') row.style.display = statusCell.includes('Ẩn') ? '' : 'none';
+            }
+        });
+    }
+</script>
+</body>
+</html>
