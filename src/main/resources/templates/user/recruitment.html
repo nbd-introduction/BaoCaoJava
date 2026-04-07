@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8"><title>Tuyển dụng - CoffeeShop</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary:#4E342E; --accent:#D4A574; --accent-light:#F5E6D3; --bg:#FFF8F0; --text:#3E2723; --text-light:#8D6E63; --shadow:0 4px 20px rgba(78,52,46,0.12); }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Lato',sans-serif; background:var(--bg); color:var(--text); }
+        .navbar { background:var(--primary); padding:0 5%; position:sticky; top:0; z-index:100; box-shadow:0 2px 20px rgba(0,0,0,0.3); }
+        .nav-inner { display:flex; align-items:center; justify-content:space-between; height:70px; }
+        .nav-logo { font-family:'Playfair Display',serif; color:var(--accent); font-size:22px; font-weight:700; text-decoration:none; }
+        .nav-logo span { color:white; }
+        .nav-links { display:flex; gap:28px; }
+        .nav-links a { color:rgba(255,255,255,0.85); text-decoration:none; font-size:14px; }
+        .nav-links a:hover { color:var(--accent); }
+
+        .page-hero { background:linear-gradient(135deg,var(--primary),#795548); padding:80px 5%; text-align:center; }
+        .page-hero h1 { font-family:'Playfair Display',serif; color:white; font-size:46px; margin-bottom:14px; }
+        .page-hero p { color:rgba(255,255,255,0.8); font-size:16px; max-width:600px; margin:0 auto; line-height:1.7; }
+        .success-msg { background:#e8f5e9; border:1px solid #a5d6a7; color:#2e7d32; padding:14px 24px; border-radius:10px; text-align:center; margin:20px 5%; font-weight:600; }
+        .content { padding:60px 5%; }
+        .jobs-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(340px, 1fr)); gap:24px; }
+        .job-card { background:white; border-radius:18px; padding:28px; box-shadow:var(--shadow); transition:all 0.3s; border-left:4px solid transparent; }
+        .job-card:hover { transform:translateY(-4px); box-shadow:0 12px 40px rgba(78,52,46,0.18); border-left-color:var(--accent); }
+        .job-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px; }
+        .job-title { font-family:'Playfair Display',serif; font-size:20px; color:var(--primary); font-weight:600; line-height:1.3; }
+        .job-type { padding:4px 12px; border-radius:20px; font-size:11px; font-weight:700; flex-shrink:0; }
+        .type-FULL_TIME { background:#e3f2fd; color:#1565c0; }
+        .type-PART_TIME { background:#ede7f6; color:#4527a0; }
+        .type-INTERN { background:#fce4ec; color:#880e4f; }
+        .job-branch { font-size:13px; color:var(--text-light); margin-bottom:10px; }
+        .job-salary { font-size:14px; font-weight:700; color:var(--primary); margin-bottom:12px; }
+        .job-desc { font-size:13px; color:var(--text-light); line-height:1.7; margin-bottom:18px; }
+        .job-footer { display:flex; justify-content:space-between; align-items:center; padding-top:16px; border-top:1px solid #f0e8e0; }
+        .job-deadline { font-size:12px; color:var(--text-light); }
+        .job-slots { font-size:12px; color:var(--primary); font-weight:600; }
+        .apply-btn { background:var(--primary); color:white; padding:10px 22px; border-radius:25px; text-decoration:none; font-size:13px; font-weight:700; transition:all 0.2s; cursor:pointer; border:none; font-family:'Lato',sans-serif; }
+        .apply-btn:hover { background:#795548; transform:translateY(-1px); }
+
+        .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:200; align-items:center; justify-content:center; }
+        .modal.show { display:flex; }
+        .modal-content { background:white; border-radius:20px; padding:36px; max-width:500px; width:90%; max-height:90vh; overflow-y:auto; }
+        .modal-title { font-family:'Playfair Display',serif; font-size:24px; color:var(--primary); margin-bottom:6px; }
+        .modal-job { font-size:14px; color:var(--text-light); margin-bottom:24px; }
+        .form-group { margin-bottom:16px; }
+        .form-group label { display:block; margin-bottom:6px; font-size:13px; font-weight:600; }
+        .form-group input, .form-group textarea { width:100%; padding:10px 14px; border:1.5px solid #e0d5cc; border-radius:10px; font-size:14px; outline:none; font-family:inherit; }
+        .form-group input:focus, .form-group textarea:focus { border-color:var(--primary); }
+        .form-group textarea { min-height:100px; resize:vertical; }
+        .modal-btns { display:flex; gap:12px; margin-top:20px; }
+        .btn-submit { flex:1; padding:13px; background:var(--primary); color:white; border:none; border-radius:10px; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit; }
+        .btn-close { padding:13px 20px; background:#f5f5f5; color:#555; border:none; border-radius:10px; font-size:14px; cursor:pointer; font-family:inherit; }
+        .empty-state { text-align:center; padding:80px; color:var(--text-light); }
+        .benefits { background:var(--accent-light); padding:60px 5%; margin-top:20px; }
+        .benefits-title { font-family:'Playfair Display',serif; font-size:32px; color:var(--primary); text-align:center; margin-bottom:36px; }
+        .benefits-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:20px; max-width:900px; margin:0 auto; }
+        .benefit { background:white; border-radius:14px; padding:24px; text-align:center; box-shadow:var(--shadow); }
+        .benefit-icon { font-size:36px; margin-bottom:12px; }
+        .benefit-title { font-weight:700; color:var(--primary); margin-bottom:6px; }
+        .benefit-desc { font-size:13px; color:var(--text-light); line-height:1.6; }
+        footer { background:#2C1810; color:rgba(255,255,255,0.6); padding:30px 5%; text-align:center; font-size:13px; }
+    </style>
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-inner">
+        <a href="/" class="nav-logo">☕ Coffee<span>Shop</span></a>
+        <div class="nav-links">
+            <a href="/">Trang chủ</a>
+            <a href="/products">Menu</a>
+            <a href="/blog">Blog</a>
+            <a href="/tuyen-dung" style="color:var(--accent)">Tuyển dụng</a>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px">
+            <a href="/cart" style="color:var(--accent);text-decoration:none;font-size:14px">🛒 Giỏ hàng</a>
+            <span sec:authorize="isAuthenticated()">
+                <a href="/profile" style="color:rgba(255,255,255,0.85);text-decoration:none;font-size:13px" sec:authentication="name">Profile</a>
+                <a href="/auth/logout" style="color:rgba(255,255,255,0.6);text-decoration:none;font-size:13px;margin-left:10px">Đăng xuất</a>
+            </span>
+            <span sec:authorize="!isAuthenticated()">
+                <a href="/auth/login" style="color:rgba(255,255,255,0.85);text-decoration:none;font-size:13px">Đăng nhập</a>
+            </span>
+        </div>
+    </div>
+</nav>
+
+<div class="page-hero">
+    <h1>💼 Gia nhập đội ngũ</h1>
+    <p>Cùng chúng tôi tạo ra những khoảnh khắc cà phê tuyệt vời. Môi trường làm việc năng động, đam mê và thân thiện.</p>
+</div>
+
+<div th:if="${param.applied}" class="success-msg">
+    ✅ Hồ sơ của bạn đã được gửi thành công! Chúng tôi sẽ liên hệ với bạn sớm nhất.
+</div>
+
+<div class="content">
+    <div th:if="${#lists.isEmpty(jobs)}" class="empty-state">
+        <div style="font-size:60px;margin-bottom:16px">💼</div>
+        <p>Hiện tại chưa có vị trí tuyển dụng nào</p>
+        <p style="margin-top:8px;font-size:13px">Vui lòng quay lại sau!</p>
+    </div>
+
+    <div class="jobs-grid">
+        <div th:each="job : ${jobs}" class="job-card">
+            <div class="job-header">
+                <div class="job-title" th:text="${job.title}">Nhân viên pha chế</div>
+                <span class="job-type"
+                      th:classappend="'type-' + ${job.jobType.name()}"
+                      th:text="${job.jobType.name() == 'FULL_TIME'} ? 'Full-time' : (${job.jobType.name() == 'PART_TIME'} ? 'Part-time' : 'Thực tập')">
+                </span>
+            </div>
+            <div class="job-branch">🏪 <span th:text="${job.branch != null ? job.branch.name : 'Tất cả chi nhánh'}"></span></div>
+            <div class="job-salary" th:if="${job.salaryRange}">💰 <span th:text="${job.salaryRange}"></span></div>
+            <div class="job-desc"
+                 th:text="${job.description != null ? #strings.abbreviate(job.description, 150) : ''}"></div>
+            <div class="job-footer">
+                <div>
+                    <div class="job-slots">👥 <span th:text="${job.slots}"></span> vị trí</div>
+                    <div class="job-deadline" th:if="${job.expiresAt}">
+                        ⏰ Hạn: <span th:text="${#temporals.format(job.expiresAt, 'dd/MM/yyyy')}"></span>
+                    </div>
+                </div>
+                <button class="apply-btn"
+                        th:attr="onclick='openApply(' + ${job.id} + ', \'' + ${job.title} + '\')'">
+                    📝 Ứng tuyển
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="benefits">
+    <h2 class="benefits-title">🎁 Quyền lợi nhân viên</h2>
+    <div class="benefits-grid">
+        <div class="benefit"><div class="benefit-icon">☕</div><div class="benefit-title">Cà phê miễn phí</div><div class="benefit-desc">Thưởng thức thoải mái tất cả đồ uống trong ca làm việc</div></div>
+        <div class="benefit"><div class="benefit-icon">📚</div><div class="benefit-title">Đào tạo chuyên sâu</div><div class="benefit-desc">Học pha chế, kiến thức cà phê từ các chuyên gia</div></div>
+        <div class="benefit"><div class="benefit-icon">🏥</div><div class="benefit-title">Bảo hiểm đầy đủ</div><div class="benefit-desc">Bảo hiểm y tế, xã hội theo quy định nhà nước</div></div>
+        <div class="benefit"><div class="benefit-icon">🎉</div><div class="benefit-title">Thưởng & phúc lợi</div><div class="benefit-desc">Thưởng lễ, tết, sinh nhật và các dịp đặc biệt</div></div>
+    </div>
+</div>
+
+<div class="modal" id="applyModal">
+    <div class="modal-content">
+        <div class="modal-title">📝 Nộp hồ sơ ứng tuyển</div>
+        <div class="modal-job" id="modalJobTitle">Vị trí: Nhân viên pha chế</div>
+        <form id="applyForm" method="post">
+            <div class="form-group">
+                <label>Họ và tên *</label>
+                <input type="text" name="applicantName" placeholder="Nguyễn Văn A" required/>
+            </div>
+            <div class="form-group">
+                <label>Email *</label>
+                <input type="email" name="applicantEmail" placeholder="email@example.com" required/>
+            </div>
+            <div class="form-group">
+                <label>Số điện thoại</label>
+                <input type="tel" name="applicantPhone" placeholder="0901 234 567"/>
+            </div>
+            <div class="form-group">
+                <label>Thư giới thiệu</label>
+                <textarea name="coverLetter" placeholder="Giới thiệu bản thân và lý do bạn muốn ứng tuyển..."></textarea>
+            </div>
+            <div class="modal-btns">
+                <button type="submit" class="btn-submit">🚀 Gửi hồ sơ</button>
+                <button type="button" class="btn-close" onclick="closeApply()">Hủy</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<footer>© 2026 CoffeeShop. ☕ Hương vị đậm đà, khoảnh khắc khó quên.</footer>
+
+<script>
+    function openApply(jobId, jobTitle) {
+        document.getElementById('modalJobTitle').textContent = 'Vị trí: ' + jobTitle;
+        document.getElementById('applyForm').action = '/tuyen-dung/' + jobId + '/apply';
+        document.getElementById('applyModal').classList.add('show');
+    }
+    function closeApply() {
+        document.getElementById('applyModal').classList.remove('show');
+    }
+    document.getElementById('applyModal').addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) closeApply();
+    });
+</script>
+</body>
+</html>

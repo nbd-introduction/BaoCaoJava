@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8"><title>Đặt hàng thành công - CoffeeShop</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary:#4E342E; --accent:#D4A574; --accent-light:#F5E6D3; --bg:#FFF8F0; --text:#3E2723; --text-light:#8D6E63; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Lato',sans-serif; background:var(--bg); min-height:100vh; display:flex; flex-direction:column; }
+        .navbar { background:var(--primary); padding:0 5%; height:65px; display:flex; align-items:center; justify-content:space-between; }
+        .nav-logo { font-family:'Playfair Display',serif; color:var(--accent); font-size:22px; font-weight:700; text-decoration:none; }
+        .nav-logo span { color:white; }
+
+        .content { flex:1; display:flex; align-items:center; justify-content:center; padding:60px 20px; }
+        .success-card { background:white; border-radius:24px; padding:60px 50px; text-align:center; max-width:520px; width:100%; box-shadow:0 8px 40px rgba(78,52,46,0.15); }
+        .success-icon { font-size:80px; margin-bottom:20px; animation:bounce 1s ease; }
+        @keyframes bounce { 0%,100%{transform:scale(1)} 50%{transform:scale(1.2)} }
+        .success-title { font-family:'Playfair Display',serif; font-size:32px; color:var(--primary); margin-bottom:12px; }
+        .success-sub { font-size:15px; color:var(--text-light); line-height:1.7; margin-bottom:28px; }
+        .order-code-box { background:var(--accent-light); border:2px dashed var(--accent); border-radius:12px; padding:18px 24px; margin-bottom:28px; }
+        .order-code-label { font-size:13px; color:var(--text-light); margin-bottom:6px; }
+        .order-code-value { font-family:'Playfair Display',serif; font-size:24px; color:var(--primary); font-weight:700; letter-spacing:2px; }
+        .info-list { display:flex; flex-direction:column; gap:10px; margin-bottom:32px; text-align:left; background:#fafaf8; border-radius:12px; padding:20px; }
+        .info-item { display:flex; align-items:center; gap:10px; font-size:14px; color:var(--text-light); }
+        .info-item strong { color:var(--text); }
+        .btn-group { display:flex; gap:14px; }
+        .btn-primary { flex:1; padding:14px; background:var(--primary); color:white; border:none; border-radius:12px; font-size:15px; font-weight:700; cursor:pointer; text-decoration:none; display:block; text-align:center; font-family:'Lato',sans-serif; transition:all 0.3s; }
+        .btn-primary:hover { background:#795548; transform:translateY(-2px); }
+        .btn-secondary { flex:1; padding:14px; background:var(--accent-light); color:var(--primary); border:none; border-radius:12px; font-size:15px; font-weight:700; text-decoration:none; display:block; text-align:center; transition:all 0.3s; }
+        .btn-secondary:hover { background:#ead5b5; }
+        footer { background:#2C1810; color:rgba(255,255,255,0.5); padding:16px 5%; text-align:center; font-size:12px; }
+    </style>
+</head>
+<body>
+<nav class="navbar">
+    <a href="/" class="nav-logo">☕ Coffee<span>Shop</span></a>
+</nav>
+
+<div class="content">
+    <div class="success-card">
+        <div class="success-icon">🎉</div>
+        <h1 class="success-title">Đặt hàng thành công!</h1>
+        <p class="success-sub">
+            Cảm ơn bạn đã đặt hàng tại CoffeeShop! Chúng tôi sẽ xử lý đơn hàng của bạn ngay lập tức.
+        </p>
+
+        <div class="order-code-box" th:if="${orderCode}">
+            <div class="order-code-label">Mã đơn hàng của bạn</div>
+            <div class="order-code-value" th:text="${orderCode}">CS-12345</div>
+        </div>
+
+        <div class="info-list">
+            <div class="info-item">📦 Trạng thái: <strong>Chờ xác nhận</strong></div>
+            <div class="info-item">⏱️ Thời gian xử lý: <strong>15 - 30 phút</strong></div>
+            <div class="info-item">📞 Hỗ trợ: <strong>1800 xxxx</strong></div>
+            <div class="info-item">⭐ Điểm tích lũy đã được cộng vào tài khoản!</div>
+        </div>
+
+        <div class="btn-group">
+            <a href="/profile/orders" class="btn-primary">📦 Xem đơn hàng</a>
+            <a href="/products" class="btn-secondary">☕ Mua thêm</a>
+        </div>
+    </div>
+</div>
+
+<footer>© 2026 CoffeeShop. ☕ Hương vị đậm đà, khoảnh khắc khó quên.</footer>
+</body>
+</html>

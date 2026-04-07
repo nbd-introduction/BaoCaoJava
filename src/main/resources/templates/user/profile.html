@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Hồ sơ - CoffeeShop</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary:#4E342E; --primary-light:#795548; --accent:#D4A574; --accent-light:#F5E6D3; --bg:#FFF8F0; --text:#3E2723; --text-light:#8D6E63; --shadow:0 4px 20px rgba(78,52,46,0.12); }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Lato',sans-serif; background:var(--bg); color:var(--text); }
+        .navbar { background:var(--primary); padding:0 5%; position:sticky; top:0; z-index:100; box-shadow:0 2px 20px rgba(0,0,0,0.3); }
+        .nav-inner { display:flex; align-items:center; justify-content:space-between; height:70px; }
+        .nav-logo { font-family:'Playfair Display',serif; color:var(--accent); font-size:22px; font-weight:700; text-decoration:none; }
+        .nav-logo span { color:white; }
+        .nav-links { display:flex; gap:28px; }
+        .nav-links a { color:rgba(255,255,255,0.85); text-decoration:none; font-size:14px; }
+        .nav-links a:hover { color:var(--accent); }
+        .cart-btn { display:flex; align-items:center; gap:6px; background:var(--accent); color:var(--primary); padding:8px 18px; border-radius:25px; text-decoration:none; font-weight:700; font-size:13px; }
+        .logout-btn { color:rgba(255,255,255,0.7); text-decoration:none; font-size:13px; }
+        .logout-btn:hover { color:var(--accent); }
+
+        .content { padding:40px 5%; max-width:960px; margin:0 auto; }
+
+        /* PROFILE HEADER */
+        .profile-header { background:linear-gradient(135deg, var(--primary), #795548); border-radius:20px; padding:32px; display:flex; align-items:center; gap:24px; margin-bottom:28px; box-shadow:var(--shadow); }
+        .profile-avatar { width:84px; height:84px; border-radius:50%; background:var(--accent); display:flex; align-items:center; justify-content:center; font-size:34px; font-weight:700; color:var(--primary); flex-shrink:0; font-family:'Playfair Display',serif; border:3px solid rgba(255,255,255,0.3); }
+        .profile-info { flex:1; }
+        .profile-info h2 { font-family:'Playfair Display',serif; color:white; font-size:24px; margin-bottom:4px; }
+        .profile-info .meta { color:rgba(255,255,255,0.7); font-size:13px; margin-bottom:2px; }
+        .profile-stats { display:flex; gap:16px; margin-top:14px; flex-wrap:wrap; }
+        .stat-item { background:rgba(255,255,255,0.15); border-radius:10px; padding:10px 16px; text-align:center; min-width:80px; }
+        .stat-item .snum { font-family:'Playfair Display',serif; font-size:22px; color:var(--accent); font-weight:700; }
+        .stat-item .slbl { font-size:11px; color:rgba(255,255,255,0.7); margin-top:1px; }
+
+        /* TABS */
+        .tabs { display:flex; gap:4px; background:white; border-radius:14px; padding:6px; box-shadow:var(--shadow); margin-bottom:22px; }
+        .tab-btn { flex:1; padding:11px; border:none; background:none; border-radius:10px; font-size:14px; font-weight:600; cursor:pointer; font-family:'Lato',sans-serif; color:var(--text-light); transition:all 0.2s; }
+        .tab-btn.active { background:var(--primary); color:white; }
+        .tab-btn:hover:not(.active) { background:var(--accent-light); color:var(--primary); }
+        .tab-content { display:none; }
+        .tab-content.active { display:block; }
+
+        /* INFO CARD */
+        .info-card { background:white; border-radius:16px; padding:26px; box-shadow:var(--shadow); }
+        .info-card h3 { font-family:'Playfair Display',serif; font-size:19px; color:var(--primary); margin-bottom:18px; }
+        .info-row { display:flex; justify-content:space-between; align-items:center; padding:13px 0; border-bottom:1px solid #f5f0eb; }
+        .info-row:last-child { border-bottom:none; }
+        .info-label { color:var(--text-light); font-size:14px; }
+        .info-value { font-weight:600; color:var(--text); font-size:14px; }
+
+        /* POINTS */
+        .points-banner { background:linear-gradient(135deg, var(--accent), #C49060); border-radius:16px; padding:22px; margin-bottom:18px; display:flex; align-items:center; justify-content:space-between; }
+        .points-banner h3 { font-family:'Playfair Display',serif; color:white; font-size:17px; margin-bottom:4px; }
+        .points-banner p { color:rgba(255,255,255,0.8); font-size:13px; }
+        .points-big { font-family:'Playfair Display',serif; font-size:46px; color:white; font-weight:700; line-height:1; }
+        .points-unit { font-size:15px; color:rgba(255,255,255,0.8); }
+
+        /* ORDERS */
+        .order-card { background:white; border-radius:14px; padding:18px; box-shadow:var(--shadow); margin-bottom:14px; border-left:4px solid #e0d5cc; transition:all 0.2s; }
+        .order-card:hover { transform:translateX(3px); }
+        .order-card.st-PENDING { border-left-color:#ff9800; }
+        .order-card.st-CONFIRMED { border-left-color:#2196F3; }
+        .order-card.st-PREPARING { border-left-color:#9C27B0; }
+        .order-card.st-DELIVERING { border-left-color:#03A9F4; }
+        .order-card.st-DONE { border-left-color:#4CAF50; }
+        .order-card.st-CANCELLED { border-left-color:#f44336; }
+        .order-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; }
+        .order-code { font-family:'Playfair Display',serif; font-size:16px; color:var(--primary); font-weight:700; }
+        .order-date { font-size:12px; color:var(--text-light); margin-top:2px; }
+        .badge { display:inline-block; padding:4px 12px; border-radius:20px; font-size:11px; font-weight:700; }
+        .bg-PENDING { background:#fff3e0; color:#e65100; }
+        .bg-CONFIRMED { background:#e3f2fd; color:#1565c0; }
+        .bg-PREPARING { background:#ede7f6; color:#4527a0; }
+        .bg-DELIVERING { background:#e1f5fe; color:#0277bd; }
+        .bg-DONE { background:#e8f5e9; color:#2e7d32; }
+        .bg-CANCELLED { background:#fdecea; color:#c62828; }
+        .order-items-wrap { margin-bottom:10px; }
+        .order-item-line { display:flex; justify-content:space-between; font-size:13px; padding:3px 0; }
+        .order-item-name { color:var(--text); }
+        .order-item-price { color:var(--text-light); }
+        .order-footer { display:flex; justify-content:space-between; align-items:center; padding-top:10px; border-top:1px solid #f5f0eb; }
+        .order-meta { font-size:12px; color:var(--text-light); }
+        .order-meta span { display:block; margin-bottom:2px; }
+        .order-total { font-family:'Playfair Display',serif; font-size:18px; font-weight:700; color:var(--primary); }
+        .order-points { font-size:11px; color:var(--text-light); text-align:right; margin-top:2px; }
+        .order-discount { font-size:12px; color:#2e7d32; font-weight:600; }
+
+        .empty-state { text-align:center; padding:60px; color:var(--text-light); }
+        .empty-state .ei { font-size:56px; margin-bottom:14px; }
+        .empty-state h3 { font-family:'Playfair Display',serif; font-size:22px; color:var(--primary); margin-bottom:8px; }
+        .btn-shop { display:inline-block; background:var(--primary); color:white; padding:12px 28px; border-radius:25px; text-decoration:none; font-weight:700; margin-top:16px; }
+
+        footer { background:#2C1810; color:rgba(255,255,255,0.6); padding:30px 5%; text-align:center; font-size:13px; margin-top:60px; }
+    </style>
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-inner">
+        <a href="/" class="nav-logo">☕ Coffee<span>Shop</span></a>
+        <div class="nav-links">
+            <a href="/">Trang chủ</a>
+            <a href="/products">Menu</a>
+            <a href="/blog">Blog</a>
+            <a href="/tuyen-dung">Tuyển dụng</a>
+        </div>
+        <div style="display:flex;align-items:center;gap:16px">
+            <a href="/cart" class="cart-btn">
+                🛒 Giỏ hàng
+                <span style="background:var(--primary);color:var(--accent);border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:10px"
+                      th:text="${session.cart != null ? #lists.size(session.cart) : 0}">0</span>
+            </a>
+            <a href="/auth/logout" class="logout-btn">🚪 Đăng xuất</a>
+        </div>
+    </div>
+</nav>
+
+<div class="content">
+    <!-- PROFILE HEADER -->
+    <div class="profile-header">
+        <div class="profile-avatar" th:text="${#strings.substring(user.name, 0, 1).toUpperCase()}">N</div>
+        <div class="profile-info">
+            <h2 th:text="${user.name}">Nguyễn Văn A</h2>
+            <div class="meta">📧 <span th:text="${user.email}"></span></div>
+            <div class="meta" th:if="${user.phone}">📞 <span th:text="${user.phone}"></span></div>
+            <div class="profile-stats">
+                <div class="stat-item">
+                    <div class="snum" th:text="${totalOrders}">0</div>
+                    <div class="slbl">Tổng đơn</div>
+                </div>
+                <div class="stat-item">
+                    <div class="snum" th:text="${doneOrders}">0</div>
+                    <div class="slbl">Hoàn thành</div>
+                </div>
+                <div class="stat-item">
+                    <div class="snum" th:text="${user.loyaltyPoints ?: 0}">0</div>
+                    <div class="slbl">Điểm</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('info', this)">👤 Thông tin</button>
+        <button class="tab-btn" onclick="switchTab('orders', this)">📦 Đơn hàng (<span th:text="${totalOrders}">0</span>)</button>
+        <button class="tab-btn" onclick="switchTab('points', this)">⭐ Điểm thưởng</button>
+    </div>
+
+    <!-- ===== TAB 1: THÔNG TIN ===== -->
+    <div id="tab-info" class="tab-content active">
+        <div class="info-card">
+            <h3>📋 Thông tin cá nhân</h3>
+            <div class="info-row">
+                <span class="info-label">👤 Họ và tên</span>
+                <span class="info-value" th:text="${user.name}"></span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">📧 Email</span>
+                <span class="info-value" th:text="${user.email}"></span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">📞 Số điện thoại</span>
+                <span class="info-value" th:text="${user.phone != null ? user.phone : 'Chưa cập nhật'}"></span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">🎭 Vai trò</span>
+                <span class="info-value">
+                    <span th:if="${user.role.name() == 'CUSTOMER'}"
+                          style="background:#e3f2fd;color:#1565c0;padding:3px 14px;border-radius:12px;font-size:12px">👤 Khách hàng</span>
+                    <span th:if="${user.role.name() == 'STAFF'}"
+                          style="background:#e8f5e9;color:#2e7d32;padding:3px 14px;border-radius:12px;font-size:12px">👨‍💼 Nhân viên</span>
+                    <span th:if="${user.role.name() == 'ADMIN'}"
+                          style="background:#fbe9e7;color:#5D4037;padding:3px 14px;border-radius:12px;font-size:12px">👑 Admin</span>
+                </span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">✅ Trạng thái</span>
+                <span class="info-value"
+                      th:style="${user.isActive} ? 'background:#e8f5e9;color:#2e7d32;padding:3px 14px;border-radius:12px;font-size:12px' : 'background:#fdecea;color:#c62828;padding:3px 14px;border-radius:12px;font-size:12px'"
+                      th:text="${user.isActive} ? '✅ Hoạt động' : '⏸ Bị khóa'"></span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">📅 Ngày đăng ký</span>
+                <span class="info-value"
+                      th:text="${user.createdAt != null ? #temporals.format(user.createdAt, 'dd/MM/yyyy') : 'N/A'}"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== TAB 2: ĐƠN HÀNG ===== -->
+    <div id="tab-orders" class="tab-content">
+
+        <div th:if="${#lists.isEmpty(orders)}" class="empty-state">
+            <div class="ei">📭</div>
+            <h3>Chưa có đơn hàng nào</h3>
+            <p>Hãy đặt ly cà phê đầu tiên của bạn!</p>
+            <a href="/products" class="btn-shop">☕ Xem Menu ngay</a>
+        </div>
+
+        <div th:each="order : ${orders}"
+             class="order-card"
+             th:classappend="'st-' + ${order.status.name()}">
+
+            <div class="order-header">
+                <div>
+                    <div class="order-code" th:text="${order.orderCode}">CS-001</div>
+                    <div class="order-date"
+                         th:text="${order.createdAt != null ? #temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm') : ''}"></div>
+                </div>
+                <span class="badge"
+                      th:classappend="'bg-' + ${order.status.name()}"
+                      th:text="${order.status.name() == 'PENDING'} ? '🕐 Chờ xác nhận' :
+                               (${order.status.name() == 'CONFIRMED'} ? '✅ Đã xác nhận' :
+                               (${order.status.name() == 'PREPARING'} ? '👨‍🍳 Đang pha chế' :
+                               (${order.status.name() == 'DELIVERING'} ? '🚚 Đang giao' :
+                               (${order.status.name() == 'DONE'} ? '🎉 Hoàn thành' : '❌ Đã hủy'))))">
+                </span>
+            </div>
+
+            <div class="order-items-wrap" th:if="${order.items != null and !#lists.isEmpty(order.items)}">
+                <div th:each="item : ${order.items}" class="order-item-line">
+                    <span class="order-item-name"
+                          th:text="${item.productName + ' (Size ' + item.size + ') ×' + item.quantity}"></span>
+                    <span class="order-item-price"
+                          th:text="${#numbers.formatInteger(item.subtotal, 1, 'COMMA') + 'đ'}"></span>
+                </div>
+            </div>
+
+            <div class="order-footer">
+                <div class="order-meta">
+                    <span th:if="${order.branch != null}" th:text="'🏪 ' + ${order.branch.name}"></span>
+                    <span th:text="'💳 ' + ${order.paymentMethod}"></span>
+                    <span class="order-discount"
+                          th:if="${order.discountAmount != null and order.discountAmount.compareTo(T(java.math.BigDecimal).ZERO) > 0}"
+                          th:text="'🎟️ Giảm -' + ${#numbers.formatInteger(order.discountAmount, 1, 'COMMA')} + 'đ'">
+                    </span>
+                </div>
+                <div style="text-align:right">
+                    <div class="order-total"
+                         th:text="${#numbers.formatInteger(order.total, 1, 'COMMA') + 'đ'}"></div>
+                    <div class="order-points"
+                         th:text="'⭐ +' + ${order.pointsEarned != null ? order.pointsEarned : 0} + ' điểm'"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== TAB 3: ĐIỂM THƯỞNG ===== -->
+    <div id="tab-points" class="tab-content">
+        <div class="points-banner">
+            <div>
+                <h3>⭐ Điểm tích lũy của bạn</h3>
+                <p>Mỗi 1.000đ = 1 điểm • Dùng điểm đổi quà</p>
+            </div>
+            <div style="text-align:right">
+                <div class="points-big" th:text="${user.loyaltyPoints ?: 0}">0</div>
+                <div class="points-unit">điểm</div>
+            </div>
+        </div>
+
+        <div class="info-card">
+            <h3>🎁 Quyền lợi điểm thưởng</h3>
+            <div class="info-row">
+                <span class="info-label">💰 Mỗi 1.000đ chi tiêu</span>
+                <span class="info-value" style="color:var(--primary)">= 1 điểm</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">🎁 100 điểm</span>
+                <span class="info-value" style="color:var(--primary)">= Giảm 10.000đ</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">☕ 500 điểm</span>
+                <span class="info-value" style="color:var(--primary)">= 1 ly cà phê miễn phí</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">👑 1000 điểm</span>
+                <span class="info-value" style="color:var(--primary)">= Thành viên VIP</span>
+            </div>
+
+            <div style="text-align:center;margin-top:20px;padding:20px;background:var(--accent-light);border-radius:12px">
+                <div style="font-size:13px;color:var(--text-light);margin-bottom:6px">Điểm hiện tại</div>
+                <div style="font-family:'Playfair Display',serif;font-size:40px;color:var(--primary);font-weight:700"
+                     th:text="${user.loyaltyPoints ?: 0}">0</div>
+                <div style="font-size:13px;color:var(--text-light);margin-bottom:14px">điểm tích lũy</div>
+                <a href="/products" style="background:var(--primary);color:white;padding:10px 24px;border-radius:20px;text-decoration:none;font-weight:700;font-size:13px">
+                    ☕ Tích thêm điểm ngay
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer>© 2026 CoffeeShop. ☕ Hương vị đậm đà, khoảnh khắc khó quên.</footer>
+
+<script>
+    function switchTab(tab, btn) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('tab-' + tab).classList.add('active');
+    }
+</script>
+</body>
+</html>

@@ -3,33 +3,41 @@
 <head>
     <meta charset="UTF-8"><title>Blog Form</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f5f5; display: flex; }
-        .sidebar { width: 220px; min-height: 100vh; background: white; box-shadow: 2px 0 10px rgba(0,0,0,0.08); position: fixed; left: 0; top: 0; overflow-y: auto; }
-        .sidebar-logo { padding: 20px 15px; border-bottom: 1px solid #f0f0f0; text-align: center; }
-        .sidebar-logo .s-icon { font-size: 30px; } .sidebar-logo h2 { color: #5D4037; font-size: 16px; margin-top: 6px; } .sidebar-logo p { color: #aaa; font-size: 11px; }
-        .menu-label { padding: 8px 15px; font-size: 10px; color: #bbb; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
-        .menu-item { display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: #555; text-decoration: none; font-size: 13px; border-left: 3px solid transparent; }
-        .menu-item:hover, .menu-item.active { background: #fbe9e7; color: #5D4037; border-left-color: #5D4037; font-weight: 600; }
-        .menu-item .mi { font-size: 16px; width: 20px; text-align: center; }
-        .main { margin-left: 220px; flex: 1; }
-        .topbar { background: white; padding: 12px 25px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-        .topbar h1 { font-size: 18px; color: #333; font-weight: 600; }
-        .btn-logout { padding: 7px 14px; background: #fbe9e7; color: #5D4037; border: none; border-radius: 8px; font-size: 12px; cursor: pointer; text-decoration: none; font-weight: 600; }
-        .content { padding: 25px; }
-        .btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; border: none; }
-        .btn-primary { background: #5D4037; color: white; } .btn-secondary { background: #f5f5f5; color: #555; } .btn-success { background: #e8f5e9; color: #2e7d32; }
-        .layout { display: grid; grid-template-columns: 1fr 280px; gap: 20px; }
-        .form-card { background: white; border-radius: 12px; padding: 24px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
-        .sidebar-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); height: fit-content; }
-        .sidebar-card h3 { font-size: 14px; font-weight: 600; color: #333; margin-bottom: 14px; }
-        .form-group { margin-bottom: 16px; }
-        .form-group label { display: block; margin-bottom: 6px; font-size: 13px; color: #555; font-weight: 500; }
-        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px 14px; border: 1.5px solid #e0e0e0; border-radius: 8px; font-size: 14px; outline: none; font-family: inherit; }
-        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #5D4037; }
-        .form-group textarea { min-height: 80px; resize: vertical; }
-        #content { min-height: 300px; }
-        .divider { height: 1px; background: #f0f0f0; margin: 18px 0; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Segoe UI',Arial,sans-serif; background:#f5f5f5; display:flex; }
+        .sidebar { width:220px; min-height:100vh; background:white; box-shadow:2px 0 10px rgba(0,0,0,0.08); position:fixed; left:0; top:0; overflow-y:auto; }
+        .sidebar-logo { padding:20px 15px; border-bottom:1px solid #f0f0f0; text-align:center; }
+        .sidebar-logo .s-icon { font-size:30px; } .sidebar-logo h2 { color:#5D4037; font-size:16px; margin-top:6px; } .sidebar-logo p { color:#aaa; font-size:11px; }
+        .menu-label { padding:8px 15px; font-size:10px; color:#bbb; text-transform:uppercase; letter-spacing:1px; font-weight:600; }
+        .menu-item { display:flex; align-items:center; gap:10px; padding:10px 15px; color:#555; text-decoration:none; font-size:13px; border-left:3px solid transparent; }
+        .menu-item:hover, .menu-item.active { background:#fbe9e7; color:#5D4037; border-left-color:#5D4037; font-weight:600; }
+        .menu-item .mi { font-size:16px; width:20px; text-align:center; }
+        .main { margin-left:220px; flex:1; }
+        .topbar { background:white; padding:12px 25px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 2px 8px rgba(0,0,0,0.06); }
+        .topbar h1 { font-size:18px; color:#333; font-weight:600; }
+        .btn-logout { padding:7px 14px; background:#fbe9e7; color:#5D4037; border:none; border-radius:8px; font-size:12px; cursor:pointer; text-decoration:none; font-weight:600; }
+        .content { padding:25px; }
+        .btn { display:inline-flex; align-items:center; gap:6px; padding:9px 16px; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; text-decoration:none; border:none; }
+        .btn-primary { background:#5D4037; color:white; } .btn-secondary { background:#f5f5f5; color:#555; } .btn-success { background:#e8f5e9; color:#2e7d32; }
+        .layout { display:grid; grid-template-columns:1fr 280px; gap:20px; }
+        .form-card { background:white; border-radius:12px; padding:24px; box-shadow:0 2px 10px rgba(0,0,0,0.06); }
+        .sidebar-card { background:white; border-radius:12px; padding:20px; box-shadow:0 2px 10px rgba(0,0,0,0.06); height:fit-content; }
+        .sidebar-card h3 { font-size:14px; font-weight:600; color:#333; margin-bottom:14px; }
+        .form-group { margin-bottom:16px; }
+        .form-group label { display:block; margin-bottom:6px; font-size:13px; color:#555; font-weight:500; }
+        .form-group input, .form-group select, .form-group textarea { width:100%; padding:10px 14px; border:1.5px solid #e0e0e0; border-radius:8px; font-size:14px; outline:none; font-family:inherit; }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color:#5D4037; }
+        .form-group textarea { min-height:80px; resize:vertical; }
+        #content { min-height:300px; }
+        .divider { height:1px; background:#f0f0f0; margin:16px 0; }
+        .upload-wrap { border:2px dashed #e0d5cc; border-radius:10px; padding:16px; text-align:center; cursor:pointer; transition:all 0.2s; background:#fafaf8; }
+        .upload-wrap:hover { border-color:#5D4037; background:#fbe9e7; }
+        .upload-wrap.has-image { border-style:solid; border-color:#5D4037; }
+        .upload-icon { font-size:24px; margin-bottom:6px; }
+        .upload-text { font-size:12px; color:#888; }
+        .img-preview { width:100%; height:120px; object-fit:cover; border-radius:8px; margin-top:8px; display:none; }
+        .current-img { width:100%; height:120px; object-fit:cover; border-radius:8px; margin-bottom:8px; }
+        .file-input { display:none; }
     </style>
 </head>
 <body>
@@ -48,6 +56,8 @@
         <a href="/admin/recruitment" class="menu-item"><span class="mi">💼</span> Tuyển dụng</a>
         <div class="menu-label">Hệ thống</div>
         <a href="/admin/staff" class="menu-item"><span class="mi">👨‍💼</span> Nhân viên</a>
+        <a href="/admin/categories" class="menu-item"><span class="mi">📂</span> Danh mục</a>
+        <a href="/admin/banners" class="menu-item"><span class="mi">🖼️</span> Banner</a>
     </div>
 </div>
 <div class="main">
@@ -56,8 +66,11 @@
         <a th:href="@{/auth/logout}" class="btn-logout">🚪 Đăng xuất</a>
     </div>
     <div class="content">
-        <form th:action="@{/admin/blog/save}" th:object="${post}" method="post">
+        <form th:action="@{/admin/blog/save}" th:object="${post}"
+              method="post" enctype="multipart/form-data">
             <input type="hidden" th:field="*{id}" th:if="${post.id != null}"/>
+            <input type="hidden" th:field="*{thumbnailUrl}"/>
+
             <div class="layout">
                 <div>
                     <div class="form-card">
@@ -67,14 +80,16 @@
                         </div>
                         <div class="form-group">
                             <label>Tóm tắt</label>
-                            <textarea th:field="*{summary}" placeholder="Mô tả ngắn về bài viết (hiển thị preview)..."></textarea>
+                            <textarea th:field="*{summary}" placeholder="Mô tả ngắn (hiển thị preview)..."></textarea>
                         </div>
                         <div class="form-group">
                             <label>Nội dung *</label>
-                            <textarea id="content" th:field="*{content}" placeholder="Viết nội dung bài viết..." style="min-height:350px" required></textarea>
+                            <textarea id="content" th:field="*{content}"
+                                      placeholder="Viết nội dung bài viết..." required></textarea>
                         </div>
                     </div>
                 </div>
+
                 <div>
                     <div class="sidebar-card">
                         <h3>⚙️ Cài đặt</h3>
@@ -105,11 +120,28 @@
                                 <option th:each="b : ${branches}" th:value="${b.id}" th:text="${b.name}"></option>
                             </select>
                         </div>
+
                         <div class="divider"></div>
+
+                        <!-- ✅ UPLOAD THUMBNAIL -->
                         <div class="form-group">
                             <label>Ảnh thumbnail</label>
-                            <input type="text" th:field="*{thumbnailUrl}" placeholder="https://..."/>
+                            <img th:if="${post.thumbnailUrl != null}" th:src="${post.thumbnailUrl}"
+                                 class="current-img" alt="Ảnh hiện tại"/>
+                            <div class="upload-wrap" onclick="document.getElementById('thumbnailFile').click()"
+                                 th:classappend="${post.thumbnailUrl != null} ? 'has-image'">
+                                <div class="upload-icon">🖼️</div>
+                                <div class="upload-text">
+                                    <strong>Chọn ảnh thumbnail</strong><br>
+                                    JPG, PNG • Tối đa 10MB
+                                </div>
+                                <img id="previewImg" class="img-preview" alt="Preview"/>
+                            </div>
+                            <input type="file" id="thumbnailFile" name="thumbnailFile" class="file-input"
+                                   accept="image/*" onchange="previewImage(this)"/>
+                            <div id="fileName" style="font-size:11px;color:#5D4037;margin-top:6px;font-weight:600"></div>
                         </div>
+
                         <div class="divider"></div>
                         <div style="display:flex;flex-direction:column;gap:10px">
                             <button type="submit" class="btn btn-primary" style="justify-content:center">💾 Lưu bài viết</button>
@@ -121,5 +153,17 @@
         </form>
     </div>
 </div>
+<script>
+    function previewImage(input) {
+        const file = input.files[0];
+        if (!file) return;
+        const preview = document.getElementById('previewImg');
+        const fileName = document.getElementById('fileName');
+        preview.src = URL.createObjectURL(file);
+        preview.style.display = 'block';
+        fileName.textContent = '✅ ' + file.name;
+        document.querySelector('.upload-wrap').classList.add('has-image');
+    }
+</script>
 </body>
 </html>

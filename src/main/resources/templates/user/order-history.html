@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><title>Lịch sử đơn hàng - CoffeeShop</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary:#4E342E; --accent:#D4A574; --accent-light:#F5E6D3; --bg:#FFF8F0; --text:#3E2723; --text-light:#8D6E63; --shadow:0 4px 20px rgba(78,52,46,0.12); }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Lato',sans-serif; background:var(--bg); color:var(--text); }
+        .navbar { background:var(--primary); padding:0 5%; position:sticky; top:0; z-index:100; }
+        .nav-inner { display:flex; align-items:center; justify-content:space-between; height:70px; }
+        .nav-logo { font-family:'Playfair Display',serif; color:var(--accent); font-size:22px; font-weight:700; text-decoration:none; }
+        .nav-logo span { color:white; }
+        .logout-btn { color:rgba(255,255,255,0.85); text-decoration:none; font-size:13px; }
+        .content { padding:50px 5%; max-width:900px; margin:0 auto; }
+        .page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:30px; }
+        .page-title { font-family:'Playfair Display',serif; font-size:32px; color:var(--primary); }
+        .back-btn { color:var(--primary); text-decoration:none; font-weight:600; font-size:14px; }
+        .order-card { background:white; border-radius:16px; padding:24px; box-shadow:var(--shadow); margin-bottom:20px; }
+        .order-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px; padding-bottom:16px; border-bottom:1px solid #f5f0eb; }
+        .order-code { font-family:'Playfair Display',serif; font-size:18px; color:var(--primary); font-weight:600; }
+        .order-date { font-size:12px; color:var(--text-light); margin-top:4px; }
+        .badge { display:inline-block; padding:4px 14px; border-radius:20px; font-size:12px; font-weight:700; }
+        .badge-PENDING { background:#fff3e0; color:#e65100; }
+        .badge-CONFIRMED { background:#e3f2fd; color:#1565c0; }
+        .badge-PREPARING { background:#ede7f6; color:#4527a0; }
+        .badge-DELIVERING { background:#e1f5fe; color:#0277bd; }
+        .badge-DONE { background:#e8f5e9; color:#2e7d32; }
+        .badge-CANCELLED { background:#fdecea; color:#c62828; }
+        .order-items { display:flex; flex-direction:column; gap:10px; margin-bottom:16px; }
+        .order-item { display:flex; justify-content:space-between; font-size:13px; }
+        .item-info { color:var(--text); }
+        .item-price { font-weight:700; color:var(--primary); }
+        .order-footer { display:flex; justify-content:space-between; align-items:center; padding-top:14px; border-top:1px solid #f5f0eb; }
+        .order-total { font-size:16px; font-weight:700; color:var(--primary); }
+        .order-branch { font-size:12px; color:var(--text-light); }
+        .empty-state { text-align:center; padding:80px; color:var(--text-light); }
+        footer { background:#2C1810; color:rgba(255,255,255,0.6); padding:30px 5%; text-align:center; font-size:13px; margin-top:60px; }
+    </style>
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-inner">
+        <a href="/" class="nav-logo">☕ Coffee<span>Shop</span></a>
+        <div style="display:flex;gap:20px">
+            <a href="/products" style="color:rgba(255,255,255,0.85);text-decoration:none;font-size:14px">Menu</a>
+            <a href="/cart" style="color:var(--accent);text-decoration:none;font-size:14px">🛒 Giỏ hàng</a>
+        </div>
+        <a href="/auth/logout" class="logout-btn">🚪 Đăng xuất</a>
+    </div>
+</nav>
+
+<div class="content">
+    <div class="page-header">
+        <h1 class="page-title">📦 Lịch sử đơn hàng</h1>
+        <a href="/profile" class="back-btn">← Hồ sơ</a>
+    </div>
+
+    <div th:if="${#lists.isEmpty(orders)}" class="empty-state">
+        <div style="font-size:70px;margin-bottom:20px">📭</div>
+        <h3 style="font-family:'Playfair Display',serif;font-size:24px;color:var(--primary);margin-bottom:10px">Chưa có đơn hàng nào</h3>
+        <p style="margin-bottom:24px">Hãy đặt ly cà phê đầu tiên của bạn!</p>
+        <a href="/products" style="background:var(--primary);color:white;padding:13px 30px;border-radius:25px;text-decoration:none;font-weight:700">☕ Xem Menu</a>
+    </div>
+
+    <div th:each="order : ${orders}" class="order-card">
+        <div class="order-header">
+            <div>
+                <div class="order-code" th:text="${order.orderCode}">CS-001</div>
+                <div class="order-date" th:text="${order.createdAt != null ? #temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm') : '-'}"></div>
+            </div>
+            <span class="badge" th:classappend="'badge-' + ${order.status.name()}" th:text="${order.status}"></span>
+        </div>
+        <div class="order-items" th:if="${order.items != null}">
+            <div th:each="item : ${order.items}" class="order-item">
+                <span class="item-info" th:text="${item.productName + ' (Size ' + item.size + ') x' + item.quantity}"></span>
+                <span class="item-price" th:text="${#numbers.formatInteger(item.subtotal, 1, 'COMMA') + 'đ'}"></span>
+            </div>
+        </div>
+        <div class="order-footer">
+            <div class="order-branch" th:text="${order.branch != null ? '🏪 ' + order.branch.name : ''}"></div>
+            <div class="order-total" th:text="'Tổng: ' + ${#numbers.formatInteger(order.total, 1, 'COMMA')} + 'đ'"></div>
+        </div>
+    </div>
+</div>
+
+<footer>© 2026 CoffeeShop. ☕ Hương vị đậm đà, khoảnh khắc khó quên.</footer>
+</body>
+</html>

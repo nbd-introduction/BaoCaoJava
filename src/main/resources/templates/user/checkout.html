@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8"><title>Thanh toán - CoffeeShop</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary:#4E342E; --accent:#D4A574; --accent-light:#F5E6D3; --bg:#FFF8F0; --text:#3E2723; --text-light:#8D6E63; --shadow:0 4px 20px rgba(78,52,46,0.12); }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Lato',sans-serif; background:var(--bg); color:var(--text); }
+        .navbar { background:var(--primary); padding:0 5%; display:flex; align-items:center; justify-content:space-between; height:70px; box-shadow:0 2px 20px rgba(0,0,0,0.3); }
+        .nav-logo { font-family:'Playfair Display',serif; color:var(--accent); font-size:22px; font-weight:700; text-decoration:none; }
+        .nav-logo span { color:white; }
+        .nav-steps { display:flex; align-items:center; gap:8px; font-size:13px; }
+        .step { color:rgba(255,255,255,0.5); }
+        .step.active { color:var(--accent); font-weight:700; }
+        .step-sep { color:rgba(255,255,255,0.3); }
+
+        .content { padding:40px 5%; max-width:1000px; margin:0 auto; }
+        .page-title { font-family:'Playfair Display',serif; font-size:32px; color:var(--primary); margin-bottom:28px; }
+        .checkout-layout { display:grid; grid-template-columns:1fr 340px; gap:28px; }
+
+        .form-card { background:white; border-radius:16px; box-shadow:var(--shadow); padding:26px; margin-bottom:18px; }
+        .form-card h3 { font-family:'Playfair Display',serif; font-size:19px; color:var(--primary); margin-bottom:18px; display:flex; align-items:center; gap:8px; }
+        .form-group { margin-bottom:15px; }
+        .form-group label { display:block; margin-bottom:5px; font-size:13px; font-weight:600; color:var(--text); }
+        .form-group input, .form-group select, .form-group textarea { width:100%; padding:11px 14px; border:1.5px solid #e0d5cc; border-radius:10px; font-size:14px; outline:none; font-family:inherit; transition:border-color 0.2s; }
+        .form-group input:focus, .form-group select:focus { border-color:var(--primary); }
+        .form-group textarea { min-height:70px; resize:vertical; }
+        .form-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+
+        .payment-options { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+        .payment-option { border:2px solid #e0d5cc; border-radius:12px; padding:13px; cursor:pointer; display:flex; align-items:center; gap:10px; transition:all 0.2s; }
+        .payment-option input[type=radio] { width:auto; accent-color:var(--primary); cursor:pointer; }
+        .payment-option:hover { border-color:var(--primary); background:var(--accent-light); }
+        .payment-option.selected { border-color:var(--primary); background:var(--accent-light); }
+        .payment-label { font-size:13px; font-weight:600; }
+        .payment-sub { font-size:11px; color:var(--text-light); }
+
+        /* SUMMARY CARD */
+        .summary-card { background:white; border-radius:16px; box-shadow:var(--shadow); padding:22px; height:fit-content; position:sticky; top:20px; }
+        .summary-title { font-family:'Playfair Display',serif; font-size:19px; color:var(--primary); margin-bottom:18px; }
+        .order-item-row { display:flex; gap:10px; padding:8px 0; border-bottom:1px solid #f5f0eb; align-items:center; }
+        .order-item-row:last-of-type { border-bottom:none; }
+        .oi-img { width:40px; height:40px; border-radius:8px; background:var(--accent-light); display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+        .oi-name { font-size:13px; font-weight:600; flex:1; line-height:1.3; }
+        .oi-size { font-size:11px; color:var(--text-light); }
+        .oi-price { font-size:13px; font-weight:700; color:var(--primary); white-space:nowrap; }
+
+        .divider { height:1px; background:#f0e8e0; margin:14px 0; }
+        .total-row { display:flex; justify-content:space-between; font-size:14px; margin-bottom:8px; }
+        .total-row.discount { color:#2e7d32; font-weight:600; }
+        .total-row.final { font-size:18px; font-weight:700; color:var(--primary); margin-top:10px; padding-top:12px; border-top:2px solid var(--accent-light); }
+
+        /* ✅ VOUCHER SECTION */
+        .voucher-section { background:var(--accent-light); border-radius:12px; padding:14px; margin-bottom:16px; }
+        .voucher-label { font-size:13px; font-weight:700; color:var(--primary); margin-bottom:10px; display:flex; align-items:center; gap:6px; }
+        .voucher-applied { display:flex; align-items:center; justify-content:space-between; background:white; border:2px solid #4CAF50; border-radius:10px; padding:10px 14px; }
+        .voucher-applied-code { font-family:monospace; font-weight:700; color:#2e7d32; font-size:15px; }
+        .voucher-applied-discount { font-size:13px; color:#2e7d32; font-weight:600; }
+        .remove-voucher-btn { background:#fdecea; color:#c62828; border:none; border-radius:8px; padding:5px 12px; font-size:12px; font-weight:700; cursor:pointer; font-family:inherit; }
+        .remove-voucher-btn:hover { background:#ffcdd2; }
+        .voucher-input-row { display:flex; gap:8px; }
+        .voucher-input { flex:1; padding:10px 14px; border:1.5px solid #e0d5cc; border-radius:10px; font-size:14px; outline:none; font-family:inherit; background:white; text-transform:uppercase; }
+        .voucher-input:focus { border-color:var(--primary); }
+        .voucher-apply-btn { padding:10px 18px; background:var(--primary); color:white; border:none; border-radius:10px; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; white-space:nowrap; transition:all 0.2s; }
+        .voucher-apply-btn:hover { background:#795548; }
+        .alert-success { background:#e8f5e9; color:#2e7d32; padding:8px 12px; border-radius:8px; font-size:13px; margin-top:8px; font-weight:600; display:flex; align-items:center; gap:6px; }
+        .alert-error { background:#fdecea; color:#c62828; padding:8px 12px; border-radius:8px; font-size:13px; margin-top:8px; font-weight:600; display:flex; align-items:center; gap:6px; }
+
+        .place-order-btn { width:100%; padding:15px; background:var(--primary); color:white; border:none; border-radius:12px; font-size:15px; font-weight:700; cursor:pointer; font-family:'Lato',sans-serif; margin-top:16px; transition:all 0.3s; }
+        .place-order-btn:hover { background:#795548; transform:translateY(-2px); }
+
+        footer { background:#2C1810; color:rgba(255,255,255,0.6); padding:30px 5%; text-align:center; font-size:13px; margin-top:60px; }
+    </style>
+</head>
+<body>
+<nav class="navbar">
+    <a href="/" class="nav-logo">☕ Coffee<span>Shop</span></a>
+    <div class="nav-steps">
+        <span class="step">🛒 Giỏ hàng</span>
+        <span class="step-sep">›</span>
+        <span class="step active">💳 Thanh toán</span>
+        <span class="step-sep">›</span>
+        <span class="step">✅ Hoàn thành</span>
+    </div>
+    <span sec:authorize="isAuthenticated()" style="color:rgba(255,255,255,0.7);font-size:13px" sec:authentication="name">User</span>
+</nav>
+
+<div class="content">
+    <h1 class="page-title">💳 Thanh toán</h1>
+
+    <!-- FORM ĐẶT HÀNG -->
+    <form id="checkoutForm" th:action="@{/cart/checkout}" method="post">
+        <div class="checkout-layout">
+            <!-- LEFT: THÔNG TIN -->
+            <div>
+                <!-- THÔNG TIN KHÁCH -->
+                <div class="form-card">
+                    <h3>👤 Thông tin của bạn</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Họ tên</label>
+                            <input type="text" th:value="${user.name}" name="customerName" required/>
+                        </div>
+                        <div class="form-group">
+                            <label>Số điện thoại</label>
+                            <input type="tel" th:value="${user.phone}" name="customerPhone"/>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" th:value="${user.email}" readonly
+                               style="background:#f9f5f2;color:var(--text-light);cursor:not-allowed"/>
+                    </div>
+                </div>
+
+                <!-- CHI NHÁNH -->
+                <div class="form-card">
+                    <h3>🏪 Chọn chi nhánh nhận hàng</h3>
+                    <div class="form-group">
+                        <label>Chi nhánh *</label>
+                        <select name="branchId" required>
+                            <option value="">-- Chọn chi nhánh --</option>
+                            <option th:each="b : ${branches}" th:value="${b.id}"
+                                    th:text="${b.name + ' - ' + b.address}"></option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Ghi chú</label>
+                        <textarea name="note" placeholder="Ít đường, ít đá, không đường..."></textarea>
+                    </div>
+                </div>
+
+                <!-- THANH TOÁN -->
+                <div class="form-card">
+                    <h3>💳 Phương thức thanh toán</h3>
+                    <div class="payment-options">
+                        <label class="payment-option selected">
+                            <input type="radio" name="paymentMethod" value="COD" checked/>
+                            <span style="font-size:22px">💵</span>
+                            <div>
+                                <div class="payment-label">Tiền mặt (COD)</div>
+                                <div class="payment-sub">Khi nhận hàng</div>
+                            </div>
+                        </label>
+                        <label class="payment-option">
+                            <input type="radio" name="paymentMethod" value="BANKING"/>
+                            <span style="font-size:22px">🏦</span>
+                            <div>
+                                <div class="payment-label">Chuyển khoản</div>
+                                <div class="payment-sub">Banking / QR</div>
+                            </div>
+                        </label>
+                        <label class="payment-option">
+                            <input type="radio" name="paymentMethod" value="MOMO"/>
+                            <span style="font-size:22px">💜</span>
+                            <div>
+                                <div class="payment-label">MoMo</div>
+                                <div class="payment-sub">Ví điện tử</div>
+                            </div>
+                        </label>
+                        <label class="payment-option">
+                            <input type="radio" name="paymentMethod" value="ZALOPAY"/>
+                            <span style="font-size:22px">💙</span>
+                            <div>
+                                <div class="payment-label">ZaloPay</div>
+                                <div class="payment-sub">Ví điện tử</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT: ORDER SUMMARY -->
+            <div class="summary-card">
+                <div class="summary-title">📋 Đơn hàng của bạn</div>
+
+                <!-- DANH SÁCH SẢN PHẨM -->
+                <div th:each="item : ${cart}" class="order-item-row">
+                    <div class="oi-img">☕</div>
+                    <div style="flex:1">
+                        <div class="oi-name" th:text="${item.productName}"></div>
+                        <div class="oi-size" th:text="'Size ' + ${item.size} + ' × ' + ${item.quantity}"></div>
+                    </div>
+                    <div class="oi-price" th:text="${#numbers.formatInteger(item.subtotal, 1, 'COMMA') + 'đ'}"></div>
+                </div>
+
+                <div class="divider"></div>
+
+                <!-- ✅ VOUCHER SECTION -->
+                <div class="voucher-section">
+                    <div class="voucher-label">🎟️ Mã giảm giá</div>
+
+                    <!-- Voucher đã áp dụng -->
+                    <div th:if="${appliedVoucher != null}" class="voucher-applied">
+                        <div>
+                            <div class="voucher-applied-code" th:text="${appliedVoucher}">CODE</div>
+                            <div class="voucher-applied-discount"
+                                 th:text="'Giảm: -' + ${#numbers.formatInteger(discountAmount, 1, 'COMMA')} + 'đ'"></div>
+                        </div>
+                        <button type="button" class="remove-voucher-btn" onclick="removeVoucher()">✕ Bỏ</button>
+                    </div>
+
+                    <!-- Input nhập voucher -->
+                    <div th:if="${appliedVoucher == null}">
+                        <div class="voucher-input-row">
+                            <input type="text" id="voucherInput" class="voucher-input"
+                                   placeholder="Nhập mã voucher..."/>
+                            <!-- ✅ Button gọi applyVoucher() -->
+                            <button type="button" class="voucher-apply-btn"
+                                    onclick="applyVoucher()">Áp dụng</button>
+                        </div>
+                    </div>
+
+                    <!-- Flash messages -->
+                    <div th:if="${voucherSuccess}" class="alert-success" th:text="${voucherSuccess}"></div>
+                    <div th:if="${voucherError}" class="alert-error" th:text="${voucherError}"></div>
+                </div>
+
+                <!-- TỔNG TIỀN -->
+                <div class="total-row">
+                    <span style="color:var(--text-light)">Tạm tính</span>
+                    <span th:text="${#numbers.formatInteger(subtotal, 1, 'COMMA') + 'đ'}"></span>
+                </div>
+                <div class="total-row discount" th:if="${discountAmount != null and discountAmount > 0}">
+                    <span>🎟️ Giảm giá</span>
+                    <span th:text="'- ' + ${#numbers.formatInteger(discountAmount, 1, 'COMMA')} + 'đ'"></span>
+                </div>
+                <div class="total-row">
+                    <span style="color:var(--text-light)">Phí giao hàng</span>
+                    <span style="color:#2e7d32;font-weight:600">Miễn phí</span>
+                </div>
+                <div class="total-row final">
+                    <span>Tổng cộng</span>
+                    <span th:text="${#numbers.formatInteger(total, 1, 'COMMA') + 'đ'}"></span>
+                </div>
+
+                <button type="submit" class="place-order-btn">🎉 Đặt hàng ngay</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<footer>© 2026 CoffeeShop. ☕ Hương vị đậm đà, khoảnh khắc khó quên.</footer>
+
+<!-- ✅ FORM RIÊNG ĐỂ APPLY VOUCHER (ngoài form checkout) -->
+<form id="voucherForm" th:action="@{/cart/apply-voucher}" method="post" style="display:none">
+    <input type="text" id="hiddenVoucherCode" name="voucherCode"/>
+</form>
+
+<form id="removeVoucherForm" th:action="@{/cart/remove-voucher}" method="post" style="display:none"></form>
+
+<script>
+    // ✅ Apply voucher - submit form riêng, không submit form checkout
+    function applyVoucher() {
+        const code = document.getElementById('voucherInput').value.trim();
+        if (!code) {
+            alert('Vui lòng nhập mã voucher!');
+            return;
+        }
+        document.getElementById('hiddenVoucherCode').value = code;
+        document.getElementById('voucherForm').submit();
+    }
+
+    // ✅ Remove voucher
+    function removeVoucher() {
+        document.getElementById('removeVoucherForm').submit();
+    }
+
+    // ✅ Payment option selection
+    document.querySelectorAll('.payment-option').forEach(option => {
+        option.addEventListener('click', () => {
+            document.querySelectorAll('.payment-option').forEach(o => o.classList.remove('selected'));
+            option.classList.add('selected');
+            option.querySelector('input[type=radio]').checked = true;
+        });
+    });
+
+    // ✅ Uppercase voucher input
+    document.getElementById('voucherInput')?.addEventListener('input', function() {
+        this.value = this.value.toUpperCase();
+    });
+
+    // ✅ Enter key để apply voucher
+    document.getElementById('voucherInput')?.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            applyVoucher();
+        }
+    });
+</script>
+</body>
+</html>

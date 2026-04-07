@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8"><title th:text="${post.title} + ' - CoffeeShop'">Blog</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary:#4E342E; --accent:#D4A574; --accent-light:#F5E6D3; --bg:#FFF8F0; --text:#3E2723; --text-light:#8D6E63; --shadow:0 4px 20px rgba(78,52,46,0.12); }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Lato',sans-serif; background:var(--bg); color:var(--text); }
+        .navbar { background:var(--primary); padding:0 5%; position:sticky; top:0; z-index:100; box-shadow:0 2px 20px rgba(0,0,0,0.3); }
+        .nav-inner { display:flex; align-items:center; justify-content:space-between; height:70px; }
+        .nav-logo { font-family:'Playfair Display',serif; color:var(--accent); font-size:22px; font-weight:700; text-decoration:none; }
+        .nav-logo span { color:white; }
+        .nav-links { display:flex; gap:28px; }
+        .nav-links a { color:rgba(255,255,255,0.85); text-decoration:none; font-size:14px; }
+        .nav-links a:hover { color:var(--accent); }
+
+        .hero-thumb { height:450px; overflow:hidden; }
+        .hero-thumb img { width:100%; height:100%; object-fit:cover; }
+        .hero-thumb-placeholder { height:450px; background:linear-gradient(135deg,var(--primary),#795548); display:flex; align-items:center; justify-content:center; font-size:80px; opacity:0.5; }
+
+        .content { max-width:780px; margin:0 auto; padding:50px 20px; }
+        .breadcrumb { display:flex; gap:8px; font-size:13px; color:var(--text-light); margin-bottom:24px; flex-wrap:wrap; }
+        .breadcrumb a { color:var(--primary); text-decoration:none; }
+        .post-type { display:inline-block; background:var(--accent-light); color:var(--primary); padding:4px 14px; border-radius:20px; font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; margin-bottom:16px; }
+        .post-title { font-family:'Playfair Display',serif; font-size:40px; color:var(--primary); line-height:1.3; margin-bottom:20px; }
+        .post-meta { display:flex; align-items:center; gap:20px; padding:16px 0; border-top:1px solid #e8ddd6; border-bottom:1px solid #e8ddd6; margin-bottom:36px; flex-wrap:wrap; }
+        .author { display:flex; align-items:center; gap:10px; }
+        .author-avatar { width:40px; height:40px; border-radius:50%; background:var(--primary); display:flex; align-items:center; justify-content:center; color:white; font-size:16px; font-weight:700; }
+        .author-name { font-weight:600; font-size:14px; }
+        .meta-info { font-size:13px; color:var(--text-light); }
+        .post-summary { background:var(--accent-light); border-left:4px solid var(--accent); padding:20px 24px; border-radius:0 12px 12px 0; margin-bottom:28px; font-size:16px; color:var(--primary); font-style:italic; line-height:1.7; }
+        .post-body { font-size:16px; line-height:1.9; color:var(--text); }
+        .post-body p { margin-bottom:20px; }
+        .post-body h2, .post-body h3 { font-family:'Playfair Display',serif; color:var(--primary); margin:30px 0 16px; }
+
+        .related-section { padding:60px 5%; background:var(--accent-light); }
+        .related-title { font-family:'Playfair Display',serif; font-size:28px; color:var(--primary); margin-bottom:24px; text-align:center; }
+        .related-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:20px; max-width:900px; margin:0 auto; }
+        .related-card { background:white; border-radius:14px; overflow:hidden; text-decoration:none; box-shadow:var(--shadow); transition:all 0.3s; }
+        .related-card:hover { transform:translateY(-4px); }
+        .related-thumb { height:160px; background:var(--accent-light); display:flex; align-items:center; justify-content:center; font-size:40px; overflow:hidden; }
+        .related-thumb img { width:100%; height:100%; object-fit:cover; }
+        .related-body { padding:16px; }
+        .related-post-title { font-size:15px; font-weight:600; color:var(--text); line-height:1.4; }
+        footer { background:#2C1810; color:rgba(255,255,255,0.6); padding:30px 5%; text-align:center; font-size:13px; }
+    </style>
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-inner">
+        <a href="/" class="nav-logo">☕ Coffee<span>Shop</span></a>
+        <div class="nav-links">
+            <a href="/">Trang chủ</a>
+            <a href="/products">Menu</a>
+            <a href="/blog">Blog</a>
+            <a href="/tuyen-dung">Tuyển dụng</a>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px">
+            <a href="/cart" style="color:var(--accent);text-decoration:none;font-size:14px">🛒 Giỏ hàng</a>
+            <span sec:authorize="isAuthenticated()">
+                <a href="/profile" style="color:rgba(255,255,255,0.85);text-decoration:none;font-size:13px" sec:authentication="name">Profile</a>
+                <a href="/auth/logout" style="color:rgba(255,255,255,0.6);text-decoration:none;font-size:13px;margin-left:10px">Đăng xuất</a>
+            </span>
+            <span sec:authorize="!isAuthenticated()">
+                <a href="/auth/login" style="color:rgba(255,255,255,0.85);text-decoration:none;font-size:13px">Đăng nhập</a>
+            </span>
+        </div>
+    </div>
+</nav>
+
+<div th:if="${post.thumbnailUrl != null}" class="hero-thumb">
+    <img th:src="${post.thumbnailUrl}" alt=""/>
+</div>
+<div th:if="${post.thumbnailUrl == null}" class="hero-thumb-placeholder">📝</div>
+
+<div class="content">
+    <div class="breadcrumb">
+        <a href="/">Trang chủ</a> ›
+        <a href="/blog">Blog</a> ›
+        <span th:text="${#strings.abbreviate(post.title, 50)}"></span>
+    </div>
+    <div class="post-type" th:text="${post.type}"></div>
+    <h1 class="post-title" th:text="${post.title}">Tiêu đề bài viết</h1>
+    <div class="post-meta">
+        <div class="author">
+            <div class="author-avatar" th:text="${post.author != null ? #strings.substring(post.author.name, 0, 1) : 'A'}">A</div>
+            <div>
+                <div class="author-name" th:text="${post.author != null ? post.author.name : 'Admin'}"></div>
+                <div class="meta-info" th:text="${post.publishedAt != null ? #temporals.format(post.publishedAt, 'dd/MM/yyyy') : ''}"></div>
+            </div>
+        </div>
+        <span class="meta-info" th:text="'👁️ ' + ${post.viewCount} + ' lượt xem'"></span>
+        <span class="meta-info" th:if="${post.category != null}" th:text="'📂 ' + ${post.category.name}"></span>
+    </div>
+    <div class="post-summary" th:if="${post.summary != null}" th:text="${post.summary}"></div>
+    <div class="post-body" th:utext="${post.content}">Nội dung bài viết...</div>
+</div>
+
+<div class="related-section" th:if="${!#lists.isEmpty(relatedPosts)}">
+    <h2 class="related-title">Bài viết liên quan</h2>
+    <div class="related-grid">
+        <a th:each="rp : ${relatedPosts}"
+           th:href="@{/blog/{id}(id=${rp.id})}"
+           class="related-card"
+           th:if="${rp.id != post.id}">
+            <div class="related-thumb">
+                <img th:if="${rp.thumbnailUrl != null}" th:src="${rp.thumbnailUrl}" alt=""/>
+                <span th:if="${rp.thumbnailUrl == null}">📝</span>
+            </div>
+            <div class="related-body">
+                <div class="related-post-title" th:text="${rp.title}"></div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<footer>© 2026 CoffeeShop. ☕ Hương vị đậm đà, khoảnh khắc khó quên.</footer>
+</body>
+</html>

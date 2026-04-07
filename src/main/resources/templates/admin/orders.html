@@ -1,13 +1,16 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8"><title>Đơn hàng - Coffee Shop Admin</title>
+    <meta charset="UTF-8">
+    <title>Đơn hàng - Coffee Shop Admin</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f5f5; display: flex; }
         .sidebar { width: 220px; min-height: 100vh; background: white; box-shadow: 2px 0 10px rgba(0,0,0,0.08); position: fixed; left: 0; top: 0; overflow-y: auto; }
         .sidebar-logo { padding: 20px 15px; border-bottom: 1px solid #f0f0f0; text-align: center; }
-        .sidebar-logo .s-icon { font-size: 30px; } .sidebar-logo h2 { color: #5D4037; font-size: 16px; margin-top: 6px; } .sidebar-logo p { color: #aaa; font-size: 11px; }
+        .sidebar-logo .s-icon { font-size: 30px; }
+        .sidebar-logo h2 { color: #5D4037; font-size: 16px; margin-top: 6px; }
+        .sidebar-logo p { color: #aaa; font-size: 11px; }
         .menu-label { padding: 8px 15px; font-size: 10px; color: #bbb; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
         .menu-item { display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: #555; text-decoration: none; font-size: 13px; border-left: 3px solid transparent; }
         .menu-item:hover, .menu-item.active { background: #fbe9e7; color: #5D4037; border-left-color: #5D4037; font-weight: 600; }
@@ -18,36 +21,39 @@
         .btn-logout { padding: 7px 14px; background: #fbe9e7; color: #5D4037; border: none; border-radius: 8px; font-size: 12px; cursor: pointer; text-decoration: none; font-weight: 600; }
         .content { padding: 25px; }
         .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; border: none; }
-        .btn-info { background: #e3f2fd; color: #1565c0; } .btn-sm { padding: 5px 10px; font-size: 12px; }
+        .btn-info { background: #e3f2fd; color: #1565c0; }
+        .btn-sm { padding: 5px 10px; font-size: 12px; }
+        .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 22px; }
+        .stat-card { background: white; padding: 18px 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+        .stat-card .ic { font-size: 26px; margin-bottom: 8px; }
+        .stat-card .num { font-size: 24px; font-weight: 700; color: #333; }
+        .stat-card .lbl { font-size: 12px; color: #999; margin-top: 4px; }
         .card { background: white; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); overflow: hidden; }
         .card-header { padding: 16px 22px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f0f0f0; }
         .card-header h2 { font-size: 15px; color: #333; font-weight: 600; }
-        table { width: 100%; border-collapse: collapse; }
-        th { padding: 11px 15px; text-align: left; font-size: 11px; color: #888; font-weight: 600; text-transform: uppercase; background: #fafafa; border-bottom: 1px solid #f0f0f0; }
-        td { padding: 12px 15px; font-size: 13px; color: #333; border-bottom: 1px solid #f5f5f5; vertical-align: middle; }
-        tr:last-child td { border-bottom: none; } tr:hover td { background: #fafafa; }
-        .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
-        .badge-pending { background: #fff3e0; color: #e65100; }
-        .badge-confirmed { background: #e3f2fd; color: #1565c0; }
-        .badge-preparing { background: #ede7f6; color: #4527a0; }
-        .badge-delivering { background: #e8f5e9; color: #1b5e20; }
-        .badge-done { background: #e8f5e9; color: #2e7d32; }
-        .badge-cancelled { background: #fdecea; color: #c62828; }
         .filter-tabs { display: flex; gap: 8px; padding: 14px 22px; border-bottom: 1px solid #f5f5f5; flex-wrap: wrap; }
         .tab { padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; text-decoration: none; border: 1.5px solid #e0e0e0; color: #555; }
         .tab:hover, .tab.active { background: #5D4037; color: white; border-color: #5D4037; }
-        .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 22px; }
-        .stat-card { background: white; padding: 16px 18px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
-        .stat-card .num { font-size: 24px; font-weight: 700; color: #333; }
-        .stat-card .lbl { font-size: 12px; color: #999; margin-top: 4px; }
-        .stat-card .ic { font-size: 24px; margin-bottom: 8px; }
+        table { width: 100%; border-collapse: collapse; }
+        th { padding: 11px 15px; text-align: left; font-size: 11px; color: #888; font-weight: 600; text-transform: uppercase; background: #fafafa; border-bottom: 1px solid #f0f0f0; }
+        td { padding: 12px 15px; font-size: 13px; color: #333; border-bottom: 1px solid #f5f5f5; vertical-align: middle; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: #fafafa; }
+        .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+        .badge-PENDING { background: #fff3e0; color: #e65100; }
+        .badge-CONFIRMED { background: #e3f2fd; color: #1565c0; }
+        .badge-PREPARING { background: #ede7f6; color: #4527a0; }
+        .badge-DELIVERING { background: #e1f5fe; color: #0277bd; }
+        .badge-DONE { background: #e8f5e9; color: #2e7d32; }
+        .badge-CANCELLED { background: #fdecea; color: #c62828; }
     </style>
 </head>
 <body>
 <div class="sidebar">
     <div class="sidebar-logo"><div class="s-icon">☕</div><h2>Coffee Shop</h2><p>Hệ thống quản lý</p></div>
     <div>
-        <div class="menu-label">Tổng quan</div><a href="/dashboard" class="menu-item"><span class="mi">📊</span> Dashboard</a>
+        <div class="menu-label">Tổng quan</div>
+        <a href="/dashboard" class="menu-item"><span class="mi">📊</span> Dashboard</a>
         <div class="menu-label">Quản lý</div>
         <a href="/admin/products" class="menu-item"><span class="mi">🛍️</span> Sản phẩm</a>
         <a href="/admin/orders" class="menu-item active"><span class="mi">📦</span> Đơn hàng</a>
@@ -59,23 +65,46 @@
         <a href="/admin/recruitment" class="menu-item"><span class="mi">💼</span> Tuyển dụng</a>
         <div class="menu-label">Hệ thống</div>
         <a href="/admin/staff" class="menu-item"><span class="mi">👨‍💼</span> Nhân viên</a>
+        <a href="/admin/categories" class="menu-item"><span class="mi">📂</span> Danh mục</a>
+        <a href="/admin/banners" class="menu-item"><span class="mi">🖼️</span> Banner</a>
     </div>
 </div>
+
 <div class="main">
     <div class="topbar">
         <h1>📦 Quản lý đơn hàng</h1>
         <a th:href="@{/auth/logout}" class="btn-logout">🚪 Đăng xuất</a>
     </div>
     <div class="content">
+
+        <!-- STATS -->
         <div class="stats-row">
-            <div class="stat-card"><div class="ic">📦</div><div class="num" th:text="${#lists.size(orders)}">0</div><div class="lbl">Tổng đơn</div></div>
-            <div class="stat-card"><div class="ic">🕐</div><div class="num" th:text="${orders.stream().filter(o -> o.status.name() == 'PENDING').count()}">0</div><div class="lbl">Chờ xác nhận</div></div>
-            <div class="stat-card"><div class="ic">🚚</div><div class="num" th:text="${orders.stream().filter(o -> o.status.name() == 'DELIVERING').count()}">0</div><div class="lbl">Đang giao</div></div>
-            <div class="stat-card"><div class="ic">✅</div><div class="num" th:text="${orders.stream().filter(o -> o.status.name() == 'DONE').count()}">0</div><div class="lbl">Hoàn thành</div></div>
+            <div class="stat-card">
+                <div class="ic">📦</div>
+                <div class="num" th:text="${totalCount}">0</div>
+                <div class="lbl">Tổng đơn</div>
+            </div>
+            <div class="stat-card">
+                <div class="ic">🕐</div>
+                <div class="num" th:text="${pendingCount}">0</div>
+                <div class="lbl">Chờ xác nhận</div>
+            </div>
+            <div class="stat-card">
+                <div class="ic">🚚</div>
+                <div class="num" th:text="${deliveringCount}">0</div>
+                <div class="lbl">Đang giao</div>
+            </div>
+            <div class="stat-card">
+                <div class="ic">✅</div>
+                <div class="num" th:text="${doneCount}">0</div>
+                <div class="lbl">Hoàn thành</div>
+            </div>
         </div>
 
         <div class="card">
-            <div class="card-header"><h2>Danh sách đơn hàng</h2></div>
+            <div class="card-header">
+                <h2>Danh sách đơn hàng</h2>
+            </div>
             <div class="filter-tabs">
                 <a href="/admin/orders" class="tab active">Tất cả</a>
                 <a href="/admin/orders?status=PENDING" class="tab">🕐 Chờ xác nhận</a>
@@ -102,31 +131,31 @@
                     <tbody>
                     <tr th:if="${#lists.isEmpty(orders)}">
                         <td colspan="8" style="text-align:center;padding:40px;color:#bbb">
-                            <div style="font-size:40px;margin-bottom:10px">📦</div>Chưa có đơn hàng nào
+                            <div style="font-size:40px;margin-bottom:10px">📦</div>
+                            Chưa có đơn hàng nào
                         </td>
                     </tr>
                     <tr th:each="o : ${orders}">
                         <td><strong style="color:#5D4037" th:text="${o.orderCode}">CS-001</strong></td>
                         <td>
-                            <div th:text="${o.user?.name ?: 'Khách'}"></div>
-                            <div style="font-size:11px;color:#bbb" th:text="${o.user?.phone ?: ''}"></div>
+                            <div th:text="${o.user != null ? o.user.name : 'Khách'}"></div>
+                            <div style="font-size:11px;color:#bbb"
+                                 th:text="${o.user != null ? o.user.phone : ''}"></div>
                         </td>
-                        <td th:text="${o.branch?.name ?: '-'}"></td>
-                        <td style="font-weight:700;color:#5D4037" th:text="${#numbers.formatInteger(o.total, 1, 'COMMA') + 'đ'}"></td>
+                        <td th:text="${o.branch != null ? o.branch.name : '-'}"></td>
+                        <td style="font-weight:700;color:#5D4037"
+                            th:text="${#numbers.formatInteger(o.total, 1, 'COMMA') + 'đ'}"></td>
                         <td>
-                            <span class="badge" th:text="${o.paymentMethod}" th:classappend="${o.paymentStatus.name() == 'PAID'} ? 'badge-done' : 'badge-pending'"></span>
+                            <span th:text="${o.paymentMethod}"></span>
                         </td>
                         <td>
                             <span class="badge"
                                   th:text="${o.status}"
-                                  th:classappend="${o.status.name() == 'PENDING'} ? 'badge-pending' :
-                                                  (${o.status.name() == 'CONFIRMED'} ? 'badge-confirmed' :
-                                                  (${o.status.name() == 'PREPARING'} ? 'badge-preparing' :
-                                                  (${o.status.name() == 'DELIVERING'} ? 'badge-delivering' :
-                                                  (${o.status.name() == 'DONE'} ? 'badge-done' : 'badge-cancelled'))))">
+                                  th:classappend="'badge-' + ${o.status.name()}">
                             </span>
                         </td>
-                        <td style="font-size:12px;color:#bbb" th:text="${#temporals.format(o.createdAt, 'dd/MM HH:mm')}"></td>
+                        <td style="font-size:12px;color:#bbb"
+                            th:text="${o.createdAt != null ? #temporals.format(o.createdAt, 'dd/MM HH:mm') : '-'}"></td>
                         <td>
                             <a th:href="@{/admin/orders/{id}(id=${o.id})}" class="btn btn-info btn-sm">👁️ Chi tiết</a>
                         </td>

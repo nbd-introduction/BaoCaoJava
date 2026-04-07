@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coffee Shop - Hương vị đậm đà</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary:#4E342E; --primary-light:#795548; --accent:#D4A574;
+            --accent-light:#F5E6D3; --bg:#FFF8F0; --text:#3E2723;
+            --text-light:#8D6E63; --white:#FFFFFF;
+            --shadow:0 4px 20px rgba(78,52,46,0.12);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Lato',sans-serif; background:var(--bg); color:var(--text); }
+
+        /* NAVBAR */
+        .navbar { background:var(--primary); padding:0 5%; position:sticky; top:0; z-index:100; box-shadow:0 2px 20px rgba(0,0,0,0.3); }
+        .nav-inner { display:flex; align-items:center; justify-content:space-between; height:70px; }
+        .nav-logo { font-family:'Playfair Display',serif; color:var(--accent); font-size:24px; font-weight:700; text-decoration:none; }
+        .nav-logo span { color:white; }
+        .nav-links { display:flex; align-items:center; gap:30px; }
+        .nav-links a { color:rgba(255,255,255,0.85); text-decoration:none; font-size:14px; transition:color 0.2s; }
+        .nav-links a:hover { color:var(--accent); }
+        .nav-right { display:flex; align-items:center; gap:14px; }
+        .cart-btn { display:flex; align-items:center; gap:6px; background:var(--accent); color:var(--primary); padding:8px 18px; border-radius:25px; text-decoration:none; font-weight:700; font-size:13px; transition:all 0.2s; }
+        .cart-btn:hover { background:#C49060; transform:translateY(-1px); }
+        .cart-count { background:var(--primary); color:var(--accent); border-radius:50%; width:18px; height:18px; display:inline-flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; }
+
+        /* HERO */
+        .hero { min-height:92vh; background:linear-gradient(135deg, #2C1810 0%, #4E342E 50%, #6D4C41 100%); display:flex; align-items:center; padding:0 5%; position:relative; overflow:hidden; }
+        .hero::after { content:'☕'; position:absolute; right:8%; top:50%; transform:translateY(-50%); font-size:280px; opacity:0.06; }
+        .hero-content { max-width:580px; z-index:1; }
+        .hero-tag { display:inline-block; background:var(--accent); color:var(--primary); padding:5px 16px; border-radius:20px; font-size:12px; font-weight:700; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; }
+        .hero h1 { font-family:'Playfair Display',serif; color:white; font-size:58px; line-height:1.2; margin-bottom:20px; }
+        .hero h1 span { color:var(--accent); }
+        .hero p { color:rgba(255,255,255,0.75); font-size:17px; line-height:1.7; margin-bottom:36px; }
+        .hero-btns { display:flex; gap:16px; flex-wrap:wrap; }
+        .btn-accent { background:var(--accent); color:var(--primary); padding:14px 32px; border-radius:30px; text-decoration:none; font-weight:700; font-size:15px; transition:all 0.3s; }
+        .btn-accent:hover { background:#C49060; transform:translateY(-2px); box-shadow:0 8px 25px rgba(212,165,116,0.4); }
+        .btn-outline { border:2px solid rgba(255,255,255,0.4); color:white; padding:14px 32px; border-radius:30px; text-decoration:none; font-size:15px; transition:all 0.3s; }
+        .btn-outline:hover { border-color:var(--accent); color:var(--accent); }
+        .hero-stats { display:flex; gap:40px; margin-top:40px; }
+        .stat { border-left:2px solid rgba(212,165,116,0.4); padding-left:16px; }
+        .stat .num { font-family:'Playfair Display',serif; font-size:28px; color:var(--accent); font-weight:700; }
+        .stat .lbl { font-size:12px; color:rgba(255,255,255,0.6); }
+
+        /* SECTIONS */
+        .section { padding:80px 5%; }
+        .section-header { text-align:center; margin-bottom:50px; }
+        .section-tag { display:inline-block; color:var(--accent); font-size:12px; font-weight:700; letter-spacing:3px; text-transform:uppercase; margin-bottom:12px; }
+        .section-title { font-family:'Playfair Display',serif; font-size:38px; color:var(--primary); }
+        .section-sub { color:var(--text-light); margin-top:10px; font-size:15px; }
+
+        /* ✅ VOUCHER SECTION */
+        .voucher-section { background:linear-gradient(135deg, var(--primary), #795548); padding:60px 5%; }
+        .voucher-section .section-tag { color:var(--accent); }
+        .voucher-section .section-title { color:white; }
+        .voucher-section .section-sub { color:rgba(255,255,255,0.7); }
+        .voucher-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:20px; }
+        .voucher-card { background:white; border-radius:16px; overflow:hidden; position:relative; box-shadow:0 8px 30px rgba(0,0,0,0.2); transition:transform 0.3s; }
+        .voucher-card:hover { transform:translateY(-4px); }
+        .voucher-left { background:linear-gradient(135deg, var(--primary), #795548); padding:22px 20px; display:flex; flex-direction:column; align-items:center; justify-content:center; min-width:110px; }
+        .voucher-icon { font-size:36px; margin-bottom:8px; }
+        .voucher-discount { font-family:'Playfair Display',serif; font-size:28px; color:var(--accent); font-weight:700; text-align:center; line-height:1; }
+        .voucher-discount-sub { font-size:11px; color:rgba(255,255,255,0.7); text-align:center; margin-top:2px; }
+        .voucher-body { display:flex; }
+        .voucher-info { flex:1; padding:18px; }
+        .voucher-code-wrap { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+        .voucher-code { font-family:monospace; font-size:18px; font-weight:700; color:var(--primary); background:var(--accent-light); padding:6px 14px; border-radius:8px; letter-spacing:2px; cursor:pointer; border:2px dashed var(--accent); }
+        .voucher-code:hover { background:var(--accent); color:white; }
+        .copy-hint { font-size:11px; color:var(--text-light); }
+        .voucher-desc { font-size:13px; color:var(--text-light); margin-bottom:8px; line-height:1.5; }
+        .voucher-min { font-size:12px; color:var(--text-light); }
+        .voucher-min strong { color:var(--primary); }
+        .voucher-footer { padding:10px 18px; background:var(--accent-light); display:flex; justify-content:space-between; align-items:center; }
+        .voucher-deadline { font-size:11px; color:var(--text-light); }
+        .voucher-uses { font-size:11px; font-weight:700; color:var(--primary); }
+        .voucher-notch-left { position:absolute; left:105px; top:50%; transform:translateY(-50%); width:18px; height:18px; border-radius:50%; }
+        .notch-top { position:absolute; left:105px; top:-9px; width:18px; height:18px; background:var(--primary); border-radius:50%; }
+        .notch-bot { position:absolute; left:105px; bottom:-9px; width:18px; height:18px; background:var(--primary); border-radius:50%; }
+
+        /* COPIED TOAST */
+        .toast { position:fixed; bottom:30px; left:50%; transform:translateX(-50%) translateY(100px); background:var(--primary); color:white; padding:12px 24px; border-radius:25px; font-size:14px; font-weight:600; z-index:999; transition:transform 0.3s; box-shadow:0 4px 20px rgba(0,0,0,0.3); }
+        .toast.show { transform:translateX(-50%) translateY(0); }
+
+        /* CATEGORIES */
+        .cat-section { background:var(--primary); }
+        .cat-section .section-tag { color:var(--accent); }
+        .cat-section .section-title { color:white; }
+        .cat-grid { display:flex; gap:16px; justify-content:center; flex-wrap:wrap; }
+        .cat-item { display:flex; flex-direction:column; align-items:center; gap:10px; padding:20px 24px; background:rgba(255,255,255,0.08); border-radius:16px; text-decoration:none; border:1px solid rgba(212,165,116,0.2); transition:all 0.3s; min-width:110px; }
+        .cat-item:hover, .cat-item.active { background:rgba(212,165,116,0.2); border-color:var(--accent); transform:translateY(-3px); }
+        .cat-item .ci { font-size:36px; }
+        .cat-item span { color:rgba(255,255,255,0.85); font-size:13px; text-align:center; }
+
+        /* PRODUCTS */
+        .products-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(240px, 1fr)); gap:24px; }
+        .product-card { background:white; border-radius:16px; overflow:hidden; box-shadow:var(--shadow); transition:all 0.3s; }
+        .product-card:hover { transform:translateY(-5px); box-shadow:0 12px 40px rgba(78,52,46,0.2); }
+        .product-img { height:200px; background:var(--accent-light); display:flex; align-items:center; justify-content:center; font-size:60px; overflow:hidden; position:relative; }
+        .product-img img { width:100%; height:100%; object-fit:cover; }
+        .product-badge { position:absolute; top:12px; left:12px; background:var(--accent); color:var(--primary); padding:3px 10px; border-radius:12px; font-size:11px; font-weight:700; }
+        .product-body { padding:18px; }
+        .product-cat { font-size:11px; color:var(--text-light); text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; }
+        .product-name { font-family:'Playfair Display',serif; font-size:17px; color:var(--text); margin-bottom:6px; font-weight:600; }
+        .product-desc { font-size:13px; color:var(--text-light); line-height:1.5; margin-bottom:14px; }
+        .product-footer { display:flex; justify-content:space-between; align-items:center; }
+        .product-price { font-size:16px; font-weight:700; color:var(--primary); }
+        .btn-order { background:var(--primary); color:white; padding:8px 18px; border-radius:20px; text-decoration:none; font-size:13px; font-weight:700; transition:all 0.2s; }
+        .btn-order:hover { background:var(--primary-light); }
+
+        /* BLOG */
+        .blog-section { background:var(--accent-light); }
+        .blog-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:24px; }
+        .blog-card { background:white; border-radius:16px; overflow:hidden; box-shadow:var(--shadow); transition:all 0.3s; text-decoration:none; display:block; }
+        .blog-card:hover { transform:translateY(-4px); }
+        .blog-thumb { height:200px; background:var(--accent-light); overflow:hidden; position:relative; }
+        .blog-thumb img { width:100%; height:100%; object-fit:cover; }
+        .blog-thumb-placeholder { width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:50px; }
+        .blog-type { position:absolute; top:12px; left:12px; padding:3px 10px; border-radius:20px; font-size:10px; font-weight:700; background:var(--accent); color:var(--primary); }
+        .blog-body { padding:18px; }
+        .blog-title { font-family:'Playfair Display',serif; font-size:16px; color:var(--text); margin-bottom:8px; line-height:1.4; }
+        .blog-meta { display:flex; gap:14px; margin-top:8px; font-size:12px; color:var(--text-light); }
+
+        /* BRANCHES */
+        .branch-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:20px; }
+        .branch-card { background:white; border-radius:14px; overflow:hidden; box-shadow:var(--shadow); }
+        .branch-img { height:160px; background:linear-gradient(135deg, var(--primary), var(--primary-light)); display:flex; align-items:center; justify-content:center; font-size:50px; overflow:hidden; }
+        .branch-img img { width:100%; height:100%; object-fit:cover; }
+        .branch-body { padding:16px; }
+        .branch-name { font-family:'Playfair Display',serif; font-size:16px; color:var(--primary); margin-bottom:6px; font-weight:600; }
+        .branch-addr { font-size:13px; color:var(--text-light); line-height:1.5; }
+        .branch-phone { font-size:13px; color:var(--primary); margin-top:6px; font-weight:600; }
+
+        /* VIEW ALL */
+        .view-all { text-align:center; margin-top:40px; }
+        .btn-brown { display:inline-block; background:var(--primary); color:white; padding:13px 32px; border-radius:30px; text-decoration:none; font-weight:700; font-size:14px; transition:all 0.3s; }
+        .btn-brown:hover { background:var(--primary-light); transform:translateY(-2px); }
+
+        /* FOOTER */
+        .footer { background:#2C1810; color:rgba(255,255,255,0.7); padding:60px 5% 30px; }
+        .footer-grid { display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:40px; margin-bottom:40px; }
+        .footer-brand .logo { font-family:'Playfair Display',serif; color:var(--accent); font-size:22px; margin-bottom:14px; }
+        .footer-brand p { font-size:14px; line-height:1.7; }
+        .footer-col h4 { color:white; font-size:14px; font-weight:700; letter-spacing:1px; margin-bottom:16px; }
+        .footer-col a { display:block; color:rgba(255,255,255,0.6); text-decoration:none; font-size:13px; margin-bottom:8px; }
+        .footer-col a:hover { color:var(--accent); }
+        .footer-bottom { border-top:1px solid rgba(255,255,255,0.1); padding-top:24px; text-align:center; font-size:13px; }
+    </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+    <div class="nav-inner">
+        <a href="/" class="nav-logo">☕ Coffee<span>Shop</span></a>
+        <div class="nav-links">
+            <a href="/">Trang chủ</a>
+            <a href="/products">Menu</a>
+            <a href="/blog">Blog</a>
+            <a href="/tuyen-dung">Tuyển dụng</a>
+        </div>
+        <div class="nav-right">
+            <a href="/cart" class="cart-btn">
+                🛒 Giỏ hàng
+                <span class="cart-count" th:text="${session.cart != null ? #lists.size(session.cart) : 0}">0</span>
+            </a>
+            <span sec:authorize="isAuthenticated()">
+                <a href="/profile" style="color:rgba(255,255,255,0.85);text-decoration:none;font-size:13px" sec:authentication="name">Profile</a>
+                <a href="/auth/logout" style="color:rgba(255,255,255,0.6);text-decoration:none;font-size:13px;margin-left:10px">Đăng xuất</a>
+            </span>
+            <span sec:authorize="!isAuthenticated()">
+                <a href="/auth/login" style="color:rgba(255,255,255,0.85);text-decoration:none;font-size:13px">Đăng nhập</a>
+            </span>
+        </div>
+    </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+    <div class="hero-content">
+        <div class="hero-tag">☕ Cà phê thượng hạng</div>
+        <h1>Hương vị <span>đậm đà</span>,<br>Khoảnh khắc<br>khó quên</h1>
+        <p>Thưởng thức những ly cà phê được chọn lọc kỹ càng từ những vùng nguyên liệu tốt nhất Tây Nguyên, mang đến hương vị thuần túy và độc đáo.</p>
+        <div class="hero-btns">
+            <a href="/products" class="btn-accent">☕ Xem Menu</a>
+            <a href="/cart" class="btn-outline">🛒 Đặt hàng ngay</a>
+        </div>
+        <div class="hero-stats">
+            <div class="stat"><div class="num">50+</div><div class="lbl">Loại cà phê</div></div>
+            <div class="stat"><div class="num" th:text="${#lists.size(branches) + '+'}">3+</div><div class="lbl">Chi nhánh</div></div>
+            <div class="stat"><div class="num">10K+</div><div class="lbl">Khách hàng</div></div>
+        </div>
+    </div>
+</section>
+
+<!-- ✅ VOUCHER SECTION -->
+<section class="voucher-section" th:if="${!#lists.isEmpty(vouchers)}">
+    <div class="section-header">
+        <div class="section-tag">Ưu đãi đặc biệt</div>
+        <h2 class="section-title">🎟️ Mã giảm giá hôm nay</h2>
+        <p class="section-sub" style="color:rgba(255,255,255,0.7)">Click vào mã để sao chép và dùng khi đặt hàng</p>
+    </div>
+    <div class="voucher-grid">
+        <div th:each="v : ${vouchers}" class="voucher-card">
+            <!-- Notch decoration -->
+            <div class="notch-top"></div>
+            <div class="notch-bot"></div>
+
+            <div class="voucher-body">
+                <!-- Phần trái: % giảm -->
+                <div class="voucher-left">
+                    <div class="voucher-icon">🎟️</div>
+                    <div class="voucher-discount"
+                         th:text="${v.discountType.name() == 'PERCENT'} ? ${v.discountValue + '%'} : ${#numbers.formatInteger(v.discountValue, 1, 'COMMA') + 'đ'}">
+                        20%
+                    </div>
+                    <div class="voucher-discount-sub"
+                         th:text="${v.discountType.name() == 'PERCENT'} ? 'Giảm' : 'Giảm ngay'">
+                        Giảm
+                    </div>
+                </div>
+
+                <!-- Phần phải: info -->
+                <div class="voucher-info">
+                    <div class="voucher-code-wrap">
+                        <div class="voucher-code"
+                             th:text="${v.code}"
+                             th:attr="onclick='copyCode(this, \'' + ${v.code} + '\')'">
+                            CODE
+                        </div>
+                        <span class="copy-hint">📋 Click để copy</span>
+                    </div>
+                    <div class="voucher-desc" th:text="${v.description ?: 'Áp dụng khi đặt hàng tại CoffeeShop'}"></div>
+                    <div class="voucher-min">
+                        Đơn tối thiểu: <strong th:text="${#numbers.formatInteger(v.minOrderValue, 1, 'COMMA') + 'đ'}">0đ</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="voucher-footer">
+                <span class="voucher-deadline"
+                      th:text="${v.expiresAt != null ? '⏰ HSD: ' + #temporals.format(v.expiresAt, 'dd/MM/yyyy') : '⏰ Không giới hạn thời gian'}">
+                </span>
+                <span class="voucher-uses"
+                      th:text="'Còn ' + ${v.maxUses - v.usedCount} + ' lượt'">
+                </span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CATEGORIES -->
+<section class="section cat-section" th:if="${!#lists.isEmpty(categories)}">
+    <div class="section-header">
+        <div class="section-tag">Danh mục</div>
+        <h2 class="section-title">Khám phá thực đơn</h2>
+    </div>
+    <div class="cat-grid">
+        <a href="/products" class="cat-item active">
+            <span class="ci">☕</span><span>Tất cả</span>
+        </a>
+        <a th:each="cat : ${categories}" th:href="@{/products(category=${cat.id})}" class="cat-item">
+            <span class="ci" th:text="${cat.iconUrl ?: '☕'}"></span>
+            <span th:text="${cat.name}">Cà phê</span>
+        </a>
+    </div>
+</section>
+
+<!-- FEATURED PRODUCTS -->
+<section class="section" th:if="${!#lists.isEmpty(featuredProducts)}">
+    <div class="section-header">
+        <div class="section-tag">Nổi bật</div>
+        <h2 class="section-title">Sản phẩm được yêu thích</h2>
+        <p class="section-sub">Những món đồ uống được khách hàng đặt nhiều nhất</p>
+    </div>
+    <div class="products-grid">
+        <div th:each="p : ${featuredProducts}" class="product-card">
+            <div class="product-img">
+                <img th:if="${p.imageUrl != null}" th:src="${p.imageUrl}" alt=""/>
+                <span th:if="${p.imageUrl == null}">☕</span>
+                <span class="product-badge" th:if="${p.avgRating != null and p.avgRating > 0}"
+                      th:text="'⭐ ' + ${#numbers.formatDecimal(p.avgRating, 1, 1)}"></span>
+            </div>
+            <div class="product-body">
+                <div class="product-cat" th:text="${p.category != null ? p.category.name : ''}"></div>
+                <div class="product-name" th:text="${p.name}">Cà phê sữa đá</div>
+                <div class="product-desc" th:text="${p.description != null ? #strings.abbreviate(p.description, 60) : ''}"></div>
+                <div class="product-footer">
+                    <div class="product-price">
+                        <th:block th:if="${p.sizes != null and !#lists.isEmpty(p.sizes)}">
+                            Từ <span th:text="${#numbers.formatInteger(p.sizes[0].price, 1, 'COMMA') + 'đ'}"></span>
+                        </th:block>
+                        <th:block th:if="${p.sizes == null or #lists.isEmpty(p.sizes)}">Liên hệ</th:block>
+                    </div>
+                    <a th:href="@{/products/{id}(id=${p.id})}" class="btn-order">Xem →</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="view-all">
+        <a href="/products" class="btn-brown">Xem toàn bộ menu →</a>
+    </div>
+</section>
+
+<!-- BLOG -->
+<section class="section blog-section" th:if="${!#lists.isEmpty(latestPosts)}">
+    <div class="section-header">
+        <div class="section-tag">Tin tức</div>
+        <h2 class="section-title">Câu chuyện cà phê</h2>
+        <p class="section-sub">Khám phá thế giới cà phê qua những bài viết thú vị</p>
+    </div>
+    <div class="blog-grid">
+        <a th:each="post : ${latestPosts}" th:href="@{/blog/{id}(id=${post.id})}" class="blog-card">
+            <div class="blog-thumb">
+                <img th:if="${post.thumbnailUrl != null}" th:src="${post.thumbnailUrl}" alt=""/>
+                <div th:if="${post.thumbnailUrl == null}" class="blog-thumb-placeholder">📝</div>
+                <span class="blog-type" th:text="${post.type}"></span>
+            </div>
+            <div class="blog-body">
+                <div class="blog-title" th:text="${post.title}">Tiêu đề bài viết</div>
+                <div class="blog-meta">
+                    <span th:text="${post.publishedAt != null ? #temporals.format(post.publishedAt, 'dd/MM/yyyy') : ''}">📅</span>
+                    <span th:text="'👁️ ' + ${post.viewCount} + ' lượt xem'"></span>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="view-all">
+        <a href="/blog" class="btn-brown">Xem tất cả bài viết →</a>
+    </div>
+</section>
+
+<!-- BRANCHES -->
+<section class="section" th:if="${!#lists.isEmpty(branches)}">
+    <div class="section-header">
+        <div class="section-tag">Hệ thống</div>
+        <h2 class="section-title">Chi nhánh của chúng tôi</h2>
+        <p class="section-sub">Tìm chúng tôi tại các địa điểm tiện lợi</p>
+    </div>
+    <div class="branch-grid">
+        <div th:each="b : ${branches}" class="branch-card">
+            <div class="branch-img">
+                <img th:if="${b.imageUrl != null}" th:src="${b.imageUrl}" alt=""/>
+                <span th:if="${b.imageUrl == null}">🏪</span>
+            </div>
+            <div class="branch-body">
+                <div class="branch-name" th:text="${b.name}">Chi nhánh</div>
+                <div class="branch-addr">📍 <span th:text="${b.address}"></span></div>
+                <div class="branch-phone" th:if="${b.phone}">📞 <span th:text="${b.phone}"></span></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+    <div class="footer-grid">
+        <div class="footer-brand">
+            <div class="logo">☕ CoffeeShop</div>
+            <p>Mang đến hương vị cà phê thuần túy và trải nghiệm tuyệt vời. Được làm từ những hạt cà phê tốt nhất Tây Nguyên.</p>
+        </div>
+        <div class="footer-col">
+            <h4>Menu</h4>
+            <a href="/products">Cà phê</a>
+            <a href="/products">Trà sữa</a>
+            <a href="/products">Nước ép</a>
+        </div>
+        <div class="footer-col">
+            <h4>Về chúng tôi</h4>
+            <a href="/blog">Blog</a>
+            <a href="/tuyen-dung">Tuyển dụng</a>
+        </div>
+        <div class="footer-col">
+            <h4>Hỗ trợ</h4>
+            <a href="/auth/login">Đăng nhập</a>
+            <a href="/auth/register">Đăng ký</a>
+            <a href="/profile/orders">Đơn hàng</a>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>© 2026 CoffeeShop. All rights reserved. ☕ Làm với ❤️ và cà phê.</p>
+    </div>
+</footer>
+
+<!-- TOAST NOTIFICATION -->
+<div class="toast" id="toast">✅ Đã sao chép mã voucher!</div>
+
+<script>
+    function copyCode(el, code) {
+        navigator.clipboard.writeText(code).then(() => {
+            // Hiệu ứng trên card
+            el.style.background = 'var(--primary)';
+            el.style.color = 'white';
+            setTimeout(() => {
+                el.style.background = '';
+                el.style.color = '';
+            }, 1500);
+
+            // Toast notification
+            const toast = document.getElementById('toast');
+            toast.textContent = '✅ Đã sao chép: ' + code;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }).catch(() => {
+            // Fallback cho browser cũ
+            const input = document.createElement('input');
+            input.value = code;
+            document.body.appendChild(input);
+            input.select();
+            document.execCommand('copy');
+            document.body.removeChild(input);
+            const toast = document.getElementById('toast');
+            toast.textContent = '✅ Đã sao chép: ' + code;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        });
+    }
+</script>
+</body>
+</html>

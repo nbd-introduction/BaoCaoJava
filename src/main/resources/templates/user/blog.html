@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8"><title>Blog - CoffeeShop</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary:#4E342E; --accent:#D4A574; --accent-light:#F5E6D3; --bg:#FFF8F0; --text:#3E2723; --text-light:#8D6E63; --shadow:0 4px 20px rgba(78,52,46,0.12); }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Lato',sans-serif; background:var(--bg); color:var(--text); }
+        .navbar { background:var(--primary); padding:0 5%; position:sticky; top:0; z-index:100; box-shadow:0 2px 20px rgba(0,0,0,0.3); }
+        .nav-inner { display:flex; align-items:center; justify-content:space-between; height:70px; }
+        .nav-logo { font-family:'Playfair Display',serif; color:var(--accent); font-size:22px; font-weight:700; text-decoration:none; }
+        .nav-logo span { color:white; }
+        .nav-links { display:flex; gap:28px; }
+        .nav-links a { color:rgba(255,255,255,0.85); text-decoration:none; font-size:14px; }
+        .nav-links a:hover { color:var(--accent); }
+
+        .page-hero { background:linear-gradient(135deg,var(--primary),#795548); padding:60px 5%; text-align:center; }
+        .page-hero h1 { font-family:'Playfair Display',serif; color:white; font-size:42px; margin-bottom:10px; }
+        .page-hero p { color:rgba(255,255,255,0.75); font-size:15px; }
+        .content { padding:50px 5%; }
+        .filter-tabs { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:36px; }
+        .filter-tab { padding:8px 20px; border-radius:25px; text-decoration:none; font-size:13px; font-weight:600; border:2px solid #e0d5cc; color:var(--text); transition:all 0.2s; }
+        .filter-tab:hover, .filter-tab.active { background:var(--primary); color:white; border-color:var(--primary); }
+        .blog-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:28px; }
+        .blog-card { background:white; border-radius:18px; overflow:hidden; box-shadow:var(--shadow); text-decoration:none; transition:all 0.3s; display:block; }
+        .blog-card:hover { transform:translateY(-6px); box-shadow:0 16px 50px rgba(78,52,46,0.18); }
+        .blog-thumb { height:220px; background:var(--accent-light); overflow:hidden; position:relative; }
+        .blog-thumb img { width:100%; height:100%; object-fit:cover; transition:transform 0.4s; }
+        .blog-card:hover .blog-thumb img { transform:scale(1.05); }
+        .blog-thumb-placeholder { width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:60px; }
+        .blog-type-badge { position:absolute; top:14px; left:14px; padding:4px 12px; border-radius:20px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:1px; }
+        .type-NEWS { background:#e3f2fd; color:#1565c0; }
+        .type-PROMOTION { background:#fce4ec; color:#880e4f; }
+        .type-PRODUCT_BENEFIT { background:#e8f5e9; color:#2e7d32; }
+        .type-NEW_BRANCH { background:var(--accent-light); color:var(--primary); }
+        .blog-body { padding:22px; }
+        .blog-title { font-family:'Playfair Display',serif; font-size:18px; color:var(--text); margin-bottom:10px; line-height:1.4; font-weight:600; }
+        .blog-summary { font-size:13px; color:var(--text-light); line-height:1.7; margin-bottom:14px; }
+        .blog-meta { display:flex; gap:16px; font-size:12px; color:var(--text-light); align-items:center; }
+        .blog-author { display:flex; align-items:center; gap:6px; }
+        .author-avatar { width:24px; height:24px; border-radius:50%; background:var(--primary); display:flex; align-items:center; justify-content:center; color:white; font-size:11px; font-weight:700; }
+        .read-more { color:var(--primary); font-weight:700; font-size:12px; margin-top:14px; display:inline-flex; align-items:center; gap:4px; }
+        .empty-state { text-align:center; padding:80px; color:var(--text-light); }
+        footer { background:#2C1810; color:rgba(255,255,255,0.6); padding:30px 5%; text-align:center; font-size:13px; margin-top:60px; }
+    </style>
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-inner">
+        <a href="/" class="nav-logo">☕ Coffee<span>Shop</span></a>
+        <div class="nav-links">
+            <a href="/">Trang chủ</a>
+            <a href="/products">Menu</a>
+            <a href="/blog">Blog</a>
+            <a href="/tuyen-dung">Tuyển dụng</a>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px">
+            <a href="/cart" style="color:var(--accent);text-decoration:none;font-size:14px;display:flex;align-items:center;gap:4px">
+                🛒 Giỏ hàng
+                <span style="background:var(--accent);color:var(--primary);border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700"
+                      th:text="${session.cart != null ? #lists.size(session.cart) : 0}">0</span>
+            </a>
+            <span sec:authorize="isAuthenticated()">
+                <a href="/profile" style="color:rgba(255,255,255,0.85);text-decoration:none;font-size:13px" sec:authentication="name">Profile</a>
+                <a href="/auth/logout" style="color:rgba(255,255,255,0.6);text-decoration:none;font-size:13px;margin-left:10px">Đăng xuất</a>
+            </span>
+            <span sec:authorize="!isAuthenticated()">
+                <a href="/auth/login" style="color:rgba(255,255,255,0.85);text-decoration:none;font-size:13px">Đăng nhập</a>
+            </span>
+        </div>
+    </div>
+</nav>
+
+<div class="page-hero">
+    <h1>📝 Blog cà phê</h1>
+    <p>Câu chuyện, kiến thức và văn hóa cà phê</p>
+</div>
+
+<div class="content">
+    <div class="filter-tabs">
+        <a href="/blog" class="filter-tab" th:classappend="${selectedType == null} ? ' active'">🌟 Tất cả</a>
+        <a href="/blog?type=NEWS" class="filter-tab" th:classappend="${selectedType == 'NEWS'} ? ' active'">📰 Tin tức</a>
+        <a href="/blog?type=PROMOTION" class="filter-tab" th:classappend="${selectedType == 'PROMOTION'} ? ' active'">🎁 Khuyến mãi</a>
+        <a href="/blog?type=PRODUCT_BENEFIT" class="filter-tab" th:classappend="${selectedType == 'PRODUCT_BENEFIT'} ? ' active'">☕ Lợi ích cà phê</a>
+        <a href="/blog?type=NEW_BRANCH" class="filter-tab" th:classappend="${selectedType == 'NEW_BRANCH'} ? ' active'">🏪 Chi nhánh mới</a>
+    </div>
+
+    <div th:if="${#lists.isEmpty(posts)}" class="empty-state">
+        <div style="font-size:60px;margin-bottom:16px">📝</div>
+        <p>Chưa có bài viết nào</p>
+    </div>
+
+    <div class="blog-grid">
+        <a th:each="post : ${posts}" th:href="@{/blog/{id}(id=${post.id})}" class="blog-card">
+            <div class="blog-thumb">
+                <img th:if="${post.thumbnailUrl != null}" th:src="${post.thumbnailUrl}" alt=""/>
+                <div th:if="${post.thumbnailUrl == null}" class="blog-thumb-placeholder">📝</div>
+                <span class="blog-type-badge"
+                      th:classappend="'type-' + ${post.type.name()}"
+                      th:text="${post.type}"></span>
+            </div>
+            <div class="blog-body">
+                <div class="blog-title" th:text="${post.title}"></div>
+                <div class="blog-summary"
+                     th:text="${post.summary != null ? #strings.abbreviate(post.summary, 120) : ''}"></div>
+                <div class="blog-meta">
+                    <div class="blog-author">
+                        <div class="author-avatar"
+                             th:text="${post.author != null ? #strings.substring(post.author.name, 0, 1) : 'A'}"></div>
+                        <span th:text="${post.author != null ? post.author.name : 'Admin'}"></span>
+                    </div>
+                    <span th:text="${post.publishedAt != null ? #temporals.format(post.publishedAt, 'dd/MM/yyyy') : ''}"></span>
+                    <span th:text="'👁️ ' + ${post.viewCount}"></span>
+                </div>
+                <div class="read-more">Đọc tiếp →</div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<footer>© 2026 CoffeeShop. ☕ Hương vị đậm đà, khoảnh khắc khó quên.</footer>
+</body>
+</html>

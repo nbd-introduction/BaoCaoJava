@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8"><title>Giỏ hàng - CoffeeShop</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary:#4E342E; --accent:#D4A574; --accent-light:#F5E6D3; --bg:#FFF8F0; --text:#3E2723; --text-light:#8D6E63; --shadow:0 4px 20px rgba(78,52,46,0.12); }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Lato',sans-serif; background:var(--bg); color:var(--text); }
+        .navbar { background:var(--primary); padding:0 5%; position:sticky; top:0; z-index:100; box-shadow:0 2px 20px rgba(0,0,0,0.3); }
+        .nav-inner { display:flex; align-items:center; justify-content:space-between; height:70px; }
+        .nav-logo { font-family:'Playfair Display',serif; color:var(--accent); font-size:22px; font-weight:700; text-decoration:none; }
+        .nav-logo span { color:white; }
+        .nav-links { display:flex; gap:28px; }
+        .nav-links a { color:rgba(255,255,255,0.85); text-decoration:none; font-size:14px; }
+        .nav-links a:hover { color:var(--accent); }
+        .cart-btn { display:flex; align-items:center; gap:6px; background:var(--accent); color:var(--primary); padding:8px 18px; border-radius:25px; text-decoration:none; font-weight:700; font-size:13px; }
+
+        .content { padding:50px 5%; max-width:1100px; margin:0 auto; }
+        .page-title { font-family:'Playfair Display',serif; font-size:36px; color:var(--primary); margin-bottom:30px; }
+        .cart-layout { display:grid; grid-template-columns:1fr 360px; gap:30px; }
+
+        .cart-items { background:white; border-radius:16px; box-shadow:var(--shadow); overflow:hidden; }
+        .cart-header { padding:18px 24px; border-bottom:1px solid #f0e8e0; font-weight:700; color:var(--primary); font-size:15px; }
+        .cart-item { display:grid; grid-template-columns:70px 1fr auto; gap:16px; align-items:center; padding:18px 24px; border-bottom:1px solid #f5f0eb; }
+        .cart-item:last-child { border-bottom:none; }
+        .item-img { width:70px; height:70px; border-radius:12px; background:var(--accent-light); display:flex; align-items:center; justify-content:center; font-size:28px; overflow:hidden; flex-shrink:0; }
+        .item-img img { width:100%; height:100%; object-fit:cover; }
+        .item-name { font-weight:700; color:var(--text); margin-bottom:4px; font-size:15px; }
+        .item-size { font-size:12px; color:var(--text-light); margin-bottom:8px; }
+        .item-price { font-weight:700; color:var(--primary); }
+        .item-right { display:flex; flex-direction:column; align-items:flex-end; gap:10px; }
+        .qty-ctrl { display:flex; align-items:center; border:2px solid #e0d5cc; border-radius:10px; overflow:hidden; }
+        .qty-btn { width:32px; height:32px; background:white; border:none; cursor:pointer; font-size:16px; color:var(--primary); font-weight:700; }
+        .qty-btn:hover { background:var(--accent-light); }
+        .qty-num { width:40px; text-align:center; font-size:14px; font-weight:700; border:none; outline:none; background:white; }
+        .remove-btn { color:#c62828; background:none; border:none; cursor:pointer; font-size:20px; padding:4px; }
+
+        .order-summary { background:white; border-radius:16px; box-shadow:var(--shadow); padding:24px; height:fit-content; position:sticky; top:90px; }
+        .summary-title { font-family:'Playfair Display',serif; font-size:20px; color:var(--primary); margin-bottom:20px; }
+        .summary-row { display:flex; justify-content:space-between; padding:10px 0; font-size:14px; border-bottom:1px solid #f5f0eb; }
+        .summary-label { color:var(--text-light); }
+        .summary-value { font-weight:600; }
+        .summary-total { display:flex; justify-content:space-between; padding:16px 0 20px; border-top:2px solid var(--accent-light); margin-top:8px; }
+        .total-label { font-size:16px; font-weight:700; }
+        .total-value { font-size:20px; font-weight:700; color:var(--primary); font-family:'Playfair Display',serif; }
+        .checkout-btn { width:100%; padding:15px; background:var(--primary); color:white; border:none; border-radius:12px; font-size:15px; font-weight:700; cursor:pointer; font-family:'Lato',sans-serif; transition:all 0.3s; text-decoration:none; display:block; text-align:center; }
+        .checkout-btn:hover { background:#795548; transform:translateY(-2px); }
+        .continue-btn { display:block; text-align:center; color:var(--primary); text-decoration:none; margin-top:12px; font-size:14px; }
+
+        /* ✅ GHI CHÚ: Voucher áp dụng ở trang CHECKOUT không phải giỏ hàng */
+        .voucher-note { background:var(--accent-light); border-radius:10px; padding:12px 16px; font-size:13px; color:var(--primary); text-align:center; margin-bottom:16px; }
+
+        .empty-cart { text-align:center; padding:80px 40px; }
+        .empty-cart .ei { font-size:80px; margin-bottom:20px; }
+        .empty-cart h3 { font-family:'Playfair Display',serif; font-size:24px; color:var(--primary); margin-bottom:10px; }
+        .empty-cart p { color:var(--text-light); margin-bottom:24px; }
+        .btn-shop { display:inline-block; background:var(--primary); color:white; padding:13px 30px; border-radius:25px; text-decoration:none; font-weight:700; }
+        footer { background:#2C1810; color:rgba(255,255,255,0.6); padding:30px 5%; text-align:center; font-size:13px; margin-top:60px; }
+    </style>
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-inner">
+        <a href="/" class="nav-logo">☕ Coffee<span>Shop</span></a>
+        <div class="nav-links">
+            <a href="/">Trang chủ</a>
+            <a href="/products">Menu</a>
+            <a href="/blog">Blog</a>
+            <a href="/tuyen-dung">Tuyển dụng</a>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px">
+            <a href="/cart" class="cart-btn">
+                🛒 Giỏ hàng
+                <span style="background:var(--primary);color:var(--accent);border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:10px"
+                      th:text="${session.cart != null ? #lists.size(session.cart) : 0}">0</span>
+            </a>
+            <span sec:authorize="isAuthenticated()">
+                <a href="/profile" style="color:rgba(255,255,255,0.85);text-decoration:none;font-size:13px" sec:authentication="name">Profile</a>
+                <a href="/auth/logout" style="color:rgba(255,255,255,0.6);text-decoration:none;font-size:13px;margin-left:10px">Đăng xuất</a>
+            </span>
+            <span sec:authorize="!isAuthenticated()">
+                <a href="/auth/login" style="color:rgba(255,255,255,0.85);text-decoration:none;font-size:13px">Đăng nhập</a>
+            </span>
+        </div>
+    </div>
+</nav>
+
+<div class="content">
+    <h1 class="page-title">🛒 Giỏ hàng của bạn</h1>
+
+    <!-- EMPTY CART -->
+    <div th:if="${#lists.isEmpty(cart)}" class="empty-cart">
+        <div class="ei">🛒</div>
+        <h3>Giỏ hàng trống</h3>
+        <p>Hãy thêm những ly cà phê yêu thích vào giỏ nhé!</p>
+        <a href="/products" class="btn-shop">☕ Xem Menu ngay</a>
+    </div>
+
+    <!-- CART WITH ITEMS -->
+    <div th:if="${!#lists.isEmpty(cart)}" class="cart-layout">
+
+        <!-- DANH SÁCH SẢN PHẨM -->
+        <div class="cart-items">
+            <div class="cart-header">
+                🛍️ <span th:text="${#lists.size(cart)}">0</span> sản phẩm
+            </div>
+            <div th:each="item, iter : ${cart}" class="cart-item">
+                <div class="item-img">
+                    <img th:if="${item.productImage != null}" th:src="${item.productImage}" alt=""/>
+                    <span th:if="${item.productImage == null}">☕</span>
+                </div>
+                <div>
+                    <div class="item-name" th:text="${item.productName}">Cà phê sữa đá</div>
+                    <div class="item-size">
+                        Size: <strong th:text="${item.size}">M</strong> |
+                        <span th:text="${#numbers.formatInteger(item.price, 1, 'COMMA') + 'đ/ly'}"></span>
+                    </div>
+                    <div class="item-price" th:text="${#numbers.formatInteger(item.subtotal, 1, 'COMMA') + 'đ'}"></div>
+                </div>
+                <div class="item-right">
+                    <form th:action="@{/cart/update/{index}(index=${iter.index})}" method="post">
+                        <div class="qty-ctrl">
+                            <button type="submit" name="quantity" th:value="${item.quantity - 1}" class="qty-btn">−</button>
+                            <span class="qty-num" th:text="${item.quantity}">1</span>
+                            <button type="submit" name="quantity" th:value="${item.quantity + 1}" class="qty-btn">+</button>
+                        </div>
+                    </form>
+                    <form th:action="@{/cart/remove/{index}(index=${iter.index})}" method="post">
+                        <button type="submit" class="remove-btn">🗑️</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- ORDER SUMMARY -->
+        <div class="order-summary">
+            <div class="summary-title">📋 Tổng đơn hàng</div>
+
+            <!-- ✅ GHI CHÚ VOUCHER -->
+            <div class="voucher-note">
+                🎟️ Nhập mã giảm giá ở bước <strong>Thanh toán</strong>
+            </div>
+
+            <div class="summary-row">
+                <span class="summary-label">Tạm tính</span>
+                <span class="summary-value" th:text="${#numbers.formatInteger(total, 1, 'COMMA') + 'đ'}">0đ</span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-label">Phí giao hàng</span>
+                <span class="summary-value" style="color:#2e7d32">Miễn phí</span>
+            </div>
+            <div class="summary-total">
+                <span class="total-label">Tổng cộng</span>
+                <span class="total-value" th:text="${#numbers.formatInteger(total, 1, 'COMMA') + 'đ'}">0đ</span>
+            </div>
+            <a href="/cart/checkout" class="checkout-btn">💳 Tiến hành thanh toán</a>
+            <a href="/products" class="continue-btn">← Tiếp tục mua hàng</a>
+        </div>
+    </div>
+</div>
+
+<footer>© 2026 CoffeeShop. ☕ Hương vị đậm đà, khoảnh khắc khó quên.</footer>
+</body>
+</html>

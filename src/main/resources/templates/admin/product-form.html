@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8"><title>Chi nhánh Form</title>
+    <meta charset="UTF-8"><title>Sản phẩm - Coffee Shop Admin</title>
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
         body { font-family:'Segoe UI',Arial,sans-serif; background:#f5f5f5; display:flex; }
@@ -24,17 +24,22 @@
         .form-group label { display:block; margin-bottom:6px; font-size:13px; color:#555; font-weight:500; }
         .form-group input, .form-group select, .form-group textarea { width:100%; padding:10px 14px; border:1.5px solid #e0e0e0; border-radius:8px; font-size:14px; outline:none; font-family:inherit; }
         .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color:#5D4037; }
-        .form-group textarea { min-height:80px; resize:vertical; }
+        .form-group textarea { min-height:100px; resize:vertical; }
         .form-row { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+        .section-title { font-size:14px; font-weight:600; color:#5D4037; margin:24px 0 14px; padding-bottom:8px; border-bottom:2px solid #fbe9e7; }
+        .size-row { display:grid; grid-template-columns:80px 1fr; gap:12px; align-items:center; margin-bottom:10px; }
+        .size-label { font-size:13px; font-weight:600; color:#5D4037; background:#fbe9e7; padding:8px 12px; border-radius:8px; text-align:center; }
+
+        /* ✅ IMAGE UPLOAD STYLES */
         .upload-wrap { border:2px dashed #e0d5cc; border-radius:12px; padding:20px; text-align:center; cursor:pointer; transition:all 0.2s; background:#fafaf8; }
         .upload-wrap:hover { border-color:#5D4037; background:#fbe9e7; }
         .upload-wrap.has-image { border-style:solid; border-color:#5D4037; }
         .upload-icon { font-size:36px; margin-bottom:8px; }
         .upload-text { font-size:13px; color:#888; }
         .upload-text strong { color:#5D4037; }
-        .img-preview { width:100%; max-height:180px; object-fit:cover; border-radius:8px; margin-top:10px; display:none; }
+        .img-preview { width:100%; max-height:200px; object-fit:contain; border-radius:8px; margin-top:10px; display:none; }
         .current-img-wrap { margin-bottom:10px; text-align:center; }
-        .current-img { width:100%; height:150px; object-fit:cover; border-radius:10px; border:2px solid #e0d5cc; }
+        .current-img { width:120px; height:120px; object-fit:cover; border-radius:10px; border:2px solid #e0d5cc; }
         .file-input { display:none; }
     </style>
 </head>
@@ -44,11 +49,11 @@
     <div>
         <div class="menu-label">Tổng quan</div><a href="/dashboard" class="menu-item"><span class="mi">📊</span> Dashboard</a>
         <div class="menu-label">Quản lý</div>
-        <a href="/admin/products" class="menu-item"><span class="mi">🛍️</span> Sản phẩm</a>
+        <a href="/admin/products" class="menu-item active"><span class="mi">🛍️</span> Sản phẩm</a>
         <a href="/admin/orders" class="menu-item"><span class="mi">📦</span> Đơn hàng</a>
         <a href="/admin/customers" class="menu-item"><span class="mi">👥</span> Khách hàng</a>
         <a href="/admin/vouchers" class="menu-item"><span class="mi">🎟️</span> Voucher</a>
-        <a href="/admin/branches" class="menu-item active"><span class="mi">🏪</span> Chi nhánh</a>
+        <a href="/admin/branches" class="menu-item"><span class="mi">🏪</span> Chi nhánh</a>
         <div class="menu-label">Nội dung</div>
         <a href="/admin/blog" class="menu-item"><span class="mi">📝</span> Blog</a>
         <a href="/admin/recruitment" class="menu-item"><span class="mi">💼</span> Tuyển dụng</a>
@@ -60,45 +65,53 @@
 </div>
 <div class="main">
     <div class="topbar">
-        <h1 th:text="${branch.id == null} ? '➕ Thêm chi nhánh' : '✏️ Sửa chi nhánh'">Chi nhánh</h1>
+        <h1 th:text="${product.id == null} ? '➕ Thêm sản phẩm' : '✏️ Sửa sản phẩm'">Sản phẩm</h1>
         <a th:href="@{/auth/logout}" class="btn-logout">🚪 Đăng xuất</a>
     </div>
     <div class="content">
         <div class="form-card">
-            <form th:action="@{/admin/branches/save}" th:object="${branch}"
+            <form th:action="@{/admin/products/save}" th:object="${product}"
                   method="post" enctype="multipart/form-data">
-                <input type="hidden" th:field="*{id}" th:if="${branch.id != null}"/>
+                <input type="hidden" th:field="*{id}" th:if="${product.id != null}"/>
                 <input type="hidden" th:field="*{imageUrl}"/>
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Tên chi nhánh *</label>
-                        <input type="text" th:field="*{name}" placeholder="VD: Coffee Shop Q1" required/>
+                        <label>Tên sản phẩm *</label>
+                        <input type="text" th:field="*{name}" placeholder="VD: Cà phê sữa đá" required/>
                     </div>
                     <div class="form-group">
-                        <label>Số điện thoại</label>
-                        <input type="tel" th:field="*{phone}" placeholder="VD: 028 1234 5678"/>
+                        <label>Danh mục *</label>
+                        <select th:field="*{category.id}" required>
+                            <option value="">-- Chọn danh mục --</option>
+                            <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}"></option>
+                        </select>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label>Địa chỉ *</label>
-                    <textarea th:field="*{address}" placeholder="Địa chỉ đầy đủ của chi nhánh..." required></textarea>
+                    <label>Mô tả</label>
+                    <textarea th:field="*{description}" placeholder="Mô tả ngắn về sản phẩm..."></textarea>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
-                        <!-- ✅ UPLOAD ẢNH CHI NHÁNH -->
-                        <label>Hình ảnh chi nhánh</label>
-                        <div class="current-img-wrap" th:if="${branch.imageUrl != null}">
-                            <img th:src="${branch.imageUrl}" class="current-img" alt="Ảnh hiện tại"/>
+                        <!-- ✅ UPLOAD ẢNH -->
+                        <label>Hình ảnh sản phẩm</label>
+
+                        <!-- Ảnh hiện tại nếu đang edit -->
+                        <div class="current-img-wrap" th:if="${product.imageUrl != null}">
+                            <img th:src="${product.imageUrl}" class="current-img" alt="Ảnh hiện tại"/>
+                            <div style="font-size:12px;color:#888;margin-top:4px">Ảnh hiện tại</div>
                         </div>
+
                         <div class="upload-wrap" onclick="document.getElementById('imageFile').click()"
-                             th:classappend="${branch.imageUrl != null} ? 'has-image'">
-                            <div class="upload-icon">🏪</div>
+                             th:classappend="${product.imageUrl != null} ? 'has-image'">
+                            <div class="upload-icon">📷</div>
                             <div class="upload-text">
                                 <strong>Click để chọn ảnh</strong><br>
-                                JPG, PNG • Tối đa 10MB
+                                hoặc kéo thả vào đây<br>
+                                <span style="font-size:11px">JPG, PNG, GIF, WebP • Tối đa 10MB</span>
                             </div>
                             <img id="previewImg" class="img-preview" alt="Preview"/>
                         </div>
@@ -107,39 +120,60 @@
                         <div id="fileName" style="font-size:12px;color:#5D4037;margin-top:6px;font-weight:600"></div>
                     </div>
 
-                    <div>
-                        <div class="form-group">
-                            <label>Ngày khai trương</label>
-                            <input type="date" th:field="*{openedAt}"/>
-                        </div>
-                        <div class="form-group">
-                            <label>Trạng thái</label>
-                            <select th:field="*{isActive}">
-                                <option value="true">✅ Đang mở cửa</option>
-                                <option value="false">⏸ Tạm đóng</option>
-                            </select>
-                        </div>
+                    <div class="form-group">
+                        <label>Trạng thái</label>
+                        <select th:field="*{isAvailable}">
+                            <option value="true">✅ Đang bán</option>
+                            <option value="false">⏸ Ẩn</option>
+                        </select>
                     </div>
                 </div>
 
-                <div style="display:flex;gap:12px;margin-top:10px">
-                    <button type="submit" class="btn btn-primary">💾 Lưu chi nhánh</button>
-                    <a href="/admin/branches" class="btn btn-secondary">Hủy</a>
+                <div class="section-title">💰 Giá theo Size</div>
+
+                <div class="size-row">
+                    <div class="size-label">S</div>
+                    <div class="form-group" style="margin:0">
+                        <input type="number" name="sizePrices" placeholder="Giá size S (VD: 35000)"/>
+                    </div>
+                    <input type="hidden" name="sizeNames" value="S"/>
+                </div>
+                <div class="size-row">
+                    <div class="size-label">M</div>
+                    <div class="form-group" style="margin:0">
+                        <input type="number" name="sizePrices" placeholder="Giá size M (VD: 45000)"/>
+                    </div>
+                    <input type="hidden" name="sizeNames" value="M"/>
+                </div>
+                <div class="size-row">
+                    <div class="size-label">L</div>
+                    <div class="form-group" style="margin:0">
+                        <input type="number" name="sizePrices" placeholder="Giá size L (VD: 55000)"/>
+                    </div>
+                    <input type="hidden" name="sizeNames" value="L"/>
+                </div>
+
+                <div style="display:flex;gap:12px;margin-top:24px">
+                    <button type="submit" class="btn btn-primary">💾 Lưu sản phẩm</button>
+                    <a href="/admin/products" class="btn btn-secondary">Hủy</a>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
 <script>
     function previewImage(input) {
         const file = input.files[0];
         if (!file) return;
         const preview = document.getElementById('previewImg');
         const fileName = document.getElementById('fileName');
+        const wrap = document.querySelector('.upload-wrap');
+
         preview.src = URL.createObjectURL(file);
         preview.style.display = 'block';
         fileName.textContent = '✅ Đã chọn: ' + file.name;
-        document.querySelector('.upload-wrap').classList.add('has-image');
+        wrap.classList.add('has-image');
     }
 </script>
 </body>
